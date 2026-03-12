@@ -66,6 +66,7 @@ supabase/migrations/001_initial_schema.sql
 supabase/migrations/002_improved_search.sql
 supabase/migrations/003_memory_notes.sql
 supabase/migrations/004_new_content_types.sql
+supabase/migrations/005_smart_spaces.sql
 ```
 
 4. Create a **storage bucket** for images:
@@ -197,6 +198,7 @@ The MCP server exposes 10 tools that Claude can use:
 
 ## Features
 
+### Core
 - **7 content types**: Thought, Link, Article, Image, YouTube, LinkedIn, Instagram
 - **Swedish full-text search** with relevance ranking and ILIKE fallback
 - **Tag system** with colors, filtering, and search integration
@@ -208,6 +210,12 @@ The MCP server exposes 10 tools that Claude can use:
 - **Dashboard** with statistics, type distribution chart, recent memories
 - **MCP integration** — save and search memories directly from Claude AI
 
+### Smart Features (inspired by [mymind](https://mymind.com))
+- **Related Memories** — each memory detail page shows up to 6 related memories, ranked by shared tag count
+- **AI Auto-Tag Suggestions** — keyword extraction from title/summary/content matched against existing tags, with suggested new tags shown as clickable pills in the memory form
+- **Distraction-Free Reader** — article text extraction via Mozilla Readability when saving links, auto-fills content field, displays estimated read time
+- **Smart Spaces** — save any active filter combination as a named "Space" that appears in the sidebar for one-click access
+
 ---
 
 ## Project Structure
@@ -218,7 +226,9 @@ web/
 │   ├── app/
 │   │   ├── api/              # API routes
 │   │   │   ├── memories/     # CRUD + notes
-│   │   │   ├── unfurl/       # URL metadata extraction
+│   │   │   ├── spaces/        # Smart Spaces CRUD
+│   │   │   ├── suggest-tags/  # AI tag suggestions
+│   │   │   ├── unfurl/       # URL metadata + article extraction
 │   │   │   ├── statistics/   # Dashboard stats
 │   │   │   ├── tags/         # Tag management
 │   │   │   └── upload/       # Image upload
@@ -227,13 +237,14 @@ web/
 │   │   ├── taggar/           # Tag management page
 │   │   └── page.tsx          # Dashboard
 │   ├── components/
-│   │   ├── memories/         # MemoryCard, MemoryForm, previews
+│   │   ├── memories/         # MemoryCard, MemoryForm, RelatedMemories, previews
+│   │   ├── spaces/           # SaveSpaceDialog
 │   │   ├── dashboard/        # Stats, charts, recent list
-│   │   ├── filters/          # FilterBar (type, tags, search)
-│   │   ├── layout/           # Sidebar navigation
+│   │   ├── filters/          # FilterBar (type, tags, search, save space)
+│   │   ├── layout/           # Sidebar navigation + spaces
 │   │   └── ui/               # MarkdownContent
-│   ├── hooks/                # SWR data hooks
-│   └── lib/                  # Supabase clients, types, utils
+│   ├── hooks/                # SWR data hooks (memories, tags, spaces, suggestions)
+│   └── lib/                  # Supabase clients, types, utils, stopwords
 
 mcp-server/
 ├── src/
@@ -251,7 +262,8 @@ supabase/
     ├── 001_initial_schema.sql      # Core tables, FTS, RLS
     ├── 002_improved_search.sql     # Enhanced search with tags in FTS
     ├── 003_memory_notes.sql        # Comment/notes table
-    └── 004_new_content_types.sql   # YouTube, LinkedIn, Instagram types
+    ├── 004_new_content_types.sql   # YouTube, LinkedIn, Instagram types
+    └── 005_smart_spaces.sql        # Smart Spaces (saved filters)
 ```
 
 ---
