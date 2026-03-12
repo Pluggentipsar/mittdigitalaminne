@@ -58,7 +58,6 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
   const debouncedTitle = useDebounce(title, 1000);
   const debouncedSummary = useDebounce(summary, 1000);
 
-  // Trigger tag suggestions when title/summary changes
   useEffect(() => {
     if (mode === "create" && (debouncedTitle || debouncedSummary)) {
       fetchSuggestions(debouncedTitle, debouncedSummary, content);
@@ -90,24 +89,20 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
 
       setUnfurlData(data);
 
-      // Auto-fill empty fields
       if (!title && data.title) setTitle(data.title);
       if (!summary && data.description) setSummary(data.description);
       if (!content && data.article_text) setContent(data.article_text);
 
-      // Trigger tag suggestions with unfurled data
       fetchSuggestions(
         data.title || title,
         data.description || summary,
         data.article_text || content
       );
 
-      // Auto-switch content type if detected
       if (data.content_type_hint && contentType === "link") {
         setContentType(data.content_type_hint as ContentType);
       }
     } catch {
-      // Silently fail
     } finally {
       setUnfurling(false);
     }
@@ -169,7 +164,6 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       if (["link", "article", "youtube", "linkedin", "instagram"].includes(contentType)) {
         body.link_url = linkUrl.trim() || null;
 
-        // Include unfurled metadata for rich previews
         if (unfurlData && mode === "create") {
           body.link_metadata = {
             og_title: unfurlData.title || undefined,
@@ -216,13 +210,13 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
   const config = contentTypeConfig[contentType];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* Type selector */}
       <div>
-        <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+        <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
           Typ
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {typeOptions.map(({ type, icon: Icon, desc }) => {
             const typeConfig = contentTypeConfig[type];
             const isSelected = contentType === type;
@@ -235,7 +229,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                   "relative flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200",
                   isSelected
                     ? "border-current shadow-sm"
-                    : "border-border hover:border-border/70 hover:-translate-y-0.5"
+                    : "border-border/60 hover:border-border hover:-translate-y-0.5"
                 )}
                 style={
                   isSelected
@@ -253,17 +247,17 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                 )}
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                    isSelected ? "bg-current/10" : "bg-muted"
+                    "w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
                   )}
                   style={
                     isSelected
                       ? { backgroundColor: `${typeConfig.hex}12` }
-                      : undefined
+                      : { backgroundColor: "var(--muted)" }
                   }
                 >
                   <Icon
                     className="h-5 w-5"
+                    strokeWidth={1.5}
                     style={
                       isSelected
                         ? { color: typeConfig.hex }
@@ -274,13 +268,13 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                 <div className="text-center">
                   <span
                     className={cn(
-                      "text-[13px] font-bold block",
+                      "text-[13px] font-semibold block",
                       !isSelected && "text-foreground"
                     )}
                   >
                     {typeConfig.label}
                   </span>
-                  <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">
+                  <span className="text-[10px] text-muted-foreground/60 leading-tight hidden sm:block mt-0.5">
                     {desc}
                   </span>
                 </div>
@@ -292,7 +286,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
 
       {/* Title */}
       <div>
-        <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+        <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
           Titel
         </label>
         <input
@@ -301,14 +295,14 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Ge ditt minne en titel..."
           required
-          className="w-full px-4 py-3 rounded-xl border border-border bg-card text-[14px] font-medium placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/30 transition-all"
+          className="w-full px-4 py-3 rounded-xl border border-border/80 bg-card text-[14px] font-medium placeholder:text-muted-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all"
         />
       </div>
 
-      {/* URL field for link/article/social */}
+      {/* URL field */}
       {["link", "article", "youtube", "linkedin", "instagram"].includes(contentType) && (
         <div className="animate-fade-in">
-          <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+          <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
             URL
           </label>
           <div className="relative">
@@ -322,16 +316,16 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                 setTimeout(() => unfurlUrl(pasted), 100);
               }}
               placeholder="https://..."
-              className="w-full px-4 py-3 rounded-xl border border-border bg-card text-[14px] font-medium placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/30 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-border/80 bg-card text-[14px] font-medium placeholder:text-muted-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all"
             />
             {unfurling && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary/50" />
               </div>
             )}
           </div>
           {unfurlData && (unfurlData.image || unfurlData.title) && (
-            <div className="mt-3 rounded-xl border border-border overflow-hidden bg-card animate-fade-in">
+            <div className="mt-3 rounded-xl border border-border/60 overflow-hidden bg-card animate-fade-in">
               {unfurlData.image && (
                 <div className="aspect-[2.5/1] bg-muted">
                   <img
@@ -341,14 +335,14 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                   />
                 </div>
               )}
-              <div className="p-3 space-y-1">
+              <div className="p-3.5 space-y-1">
                 {unfurlData.title && (
                   <p className="text-[12px] font-semibold line-clamp-2">{unfurlData.title}</p>
                 )}
                 {unfurlData.description && (
                   <p className="text-[11px] text-muted-foreground line-clamp-2">{unfurlData.description}</p>
                 )}
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
                   {unfurlData.favicon && (
                     <img src={unfurlData.favicon} alt="" className="w-3 h-3 rounded" />
                   )}
@@ -366,11 +360,11 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       {/* Image upload */}
       {contentType === "image" && (
         <div className="animate-fade-in">
-          <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+          <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
             Bild
           </label>
           {imagePreview ? (
-            <div className="relative rounded-2xl overflow-hidden border border-border">
+            <div className="relative rounded-2xl overflow-hidden border border-border/60">
               <img
                 src={imagePreview}
                 alt="Preview"
@@ -388,15 +382,15 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center gap-3 py-12 rounded-2xl border-2 border-dashed border-border hover:border-primary/30 cursor-pointer transition-all hover:bg-muted/30 group">
-              <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center group-hover:bg-primary/8 transition-colors">
-                <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+            <label className="flex flex-col items-center gap-3 py-14 rounded-2xl border-2 border-dashed border-border/60 hover:border-primary/25 cursor-pointer transition-all hover:bg-accent/30 group">
+              <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center group-hover:bg-primary/8 transition-colors">
+                <Upload className="h-6 w-6 text-muted-foreground/50 group-hover:text-primary transition-colors" strokeWidth={1.5} />
               </div>
               <div className="text-center">
-                <span className="text-[13px] font-semibold text-foreground/70 block">
+                <span className="text-[13px] font-medium text-foreground/60 block">
                   Klicka eller dra en bild hit
                 </span>
-                <span className="text-[11px] text-muted-foreground mt-1 block">
+                <span className="text-[11px] text-muted-foreground/50 mt-1 block">
                   JPG, PNG, WebP eller GIF
                 </span>
               </div>
@@ -414,7 +408,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       {/* Content */}
       {(contentType === "thought" || contentType === "article") && (
         <div className="animate-fade-in">
-          <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+          <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
             Innehåll
           </label>
           <textarea
@@ -426,14 +420,14 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                 : "Klistra in artikeltext..."
             }
             rows={6}
-            className="w-full px-4 py-3 rounded-xl border border-border bg-card text-[14px] leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/30 transition-all resize-y"
+            className="w-full px-4 py-3 rounded-xl border border-border/80 bg-card text-[14px] leading-relaxed placeholder:text-muted-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all resize-y"
           />
         </div>
       )}
 
       {/* Summary */}
       <div>
-        <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+        <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
           Sammanfattning
         </label>
         <textarea
@@ -441,13 +435,13 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
           onChange={(e) => setSummary(e.target.value)}
           placeholder="En kort sammanfattning..."
           rows={3}
-          className="w-full px-4 py-3 rounded-xl border border-border bg-card text-[14px] leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/30 transition-all resize-y"
+          className="w-full px-4 py-3 rounded-xl border border-border/80 bg-card text-[14px] leading-relaxed placeholder:text-muted-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all resize-y"
         />
       </div>
 
       {/* Tags */}
       <div>
-        <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+        <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
           Taggar
         </label>
         {tags.length > 0 && (
@@ -455,7 +449,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold bg-primary/8 text-primary"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium bg-primary/8 text-primary"
               >
                 {tag}
                 <button
@@ -481,13 +475,13 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
               }
             }}
             placeholder="Lägg till tagg..."
-            className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card text-[13px] font-medium placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/30 transition-all"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border/80 bg-card text-[13px] font-medium placeholder:text-muted-foreground/35 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/25 transition-all"
           />
           <button
             type="button"
             onClick={addTag}
             disabled={!tagInput.trim()}
-            className="px-4 py-2.5 rounded-xl bg-muted text-foreground text-[13px] font-semibold hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2.5 rounded-xl bg-accent text-foreground text-[13px] font-semibold hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             Lägg till
           </button>
@@ -495,13 +489,13 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
 
         {/* Tag suggestions */}
         {mode === "create" && suggestions && (
-          <div className="mt-3 space-y-2 animate-fade-in">
+          <div className="mt-3 space-y-2.5 animate-fade-in">
             {suggestions.existing.filter((t) => !tags.includes(t)).length > 0 && (
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider">
+                <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.1em]">
                   Befintliga taggar
                 </span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {suggestions.existing
                     .filter((t) => !tags.includes(t))
                     .map((tag) => (
@@ -509,7 +503,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                         key={tag}
                         type="button"
                         onClick={() => setTags([...tags, tag])}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-primary/20 text-primary/70 hover:bg-primary/5 cursor-pointer transition-all"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border border-primary/15 text-primary/70 hover:bg-primary/5 cursor-pointer transition-all"
                       >
                         <span>+</span> {tag}
                       </button>
@@ -519,11 +513,11 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
             )}
             {suggestions.suggested.filter((t) => !tags.includes(t)).length > 0 && (
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider flex items-center gap-1">
+                <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.1em] flex items-center gap-1">
                   <Sparkles className="h-2.5 w-2.5" />
                   Föreslagna
                 </span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {suggestions.suggested
                     .filter((t) => !tags.includes(t))
                     .map((tag) => (
@@ -531,7 +525,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
                         key={tag}
                         type="button"
                         onClick={() => setTags([...tags, tag])}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-dashed border-muted-foreground/20 text-muted-foreground/60 hover:bg-muted hover:text-foreground cursor-pointer transition-all"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border border-dashed border-muted-foreground/15 text-muted-foreground/50 hover:bg-accent hover:text-foreground cursor-pointer transition-all"
                       >
                         <span>+</span> {tag}
                       </button>
@@ -547,7 +541,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       <button
         type="submit"
         disabled={saving || !title.trim()}
-        className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.99]"
+        className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground text-[14px] font-semibold hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.99]"
       >
         {saving ? (
           <span className="flex items-center justify-center gap-2">

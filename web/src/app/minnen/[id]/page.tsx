@@ -55,26 +55,26 @@ export default function MemoryDetailPage({
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="skeleton h-5 w-24" />
+        <div className="skeleton h-4 w-20" />
         <div className="skeleton h-8 w-2/3" />
-        <div className="skeleton h-5 w-1/4" />
-        <div className="skeleton h-40 w-full rounded-2xl" />
+        <div className="skeleton h-4 w-1/4" />
+        <div className="skeleton h-48 w-full rounded-2xl" />
       </div>
     );
   }
 
   if (!memory) {
     return (
-      <div className="max-w-3xl mx-auto flex flex-col items-center justify-center py-20 animate-fade-in">
-        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-          <Sparkles className="h-8 w-8 text-muted-foreground/40" />
+      <div className="max-w-3xl mx-auto flex flex-col items-center justify-center py-24 animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mb-5">
+          <Sparkles className="h-7 w-7 text-muted-foreground/35" strokeWidth={1.5} />
         </div>
-        <p className="text-[15px] font-semibold text-foreground/70 mb-1">
+        <p className="heading-serif text-[20px] text-foreground/70 mb-1">
           Minnet hittades inte
         </p>
         <Link
           href="/minnen"
-          className="text-[13px] text-primary font-medium mt-2 hover:underline"
+          className="text-[13px] text-primary font-medium mt-3 hover:underline"
         >
           Tillbaka till minnen
         </Link>
@@ -85,23 +85,23 @@ export default function MemoryDetailPage({
   const config = contentTypeConfig[memory.content_type];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
       {/* Back + actions */}
       <div className="flex items-center justify-between">
         <Link
           href="/minnen"
-          className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           Tillbaka
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <Link
             href={`/minnen/${id}/redigera`}
-            className="p-2.5 rounded-xl hover:bg-accent text-muted-foreground hover:text-foreground transition-all"
+            className="p-2.5 rounded-xl hover:bg-accent text-muted-foreground/60 hover:text-foreground transition-all"
             title="Redigera"
           >
-            <Pencil className="h-[18px] w-[18px]" />
+            <Pencil className="h-[17px] w-[17px]" strokeWidth={1.5} />
           </Link>
           <button
             onClick={handleToggleFavorite}
@@ -110,19 +110,19 @@ export default function MemoryDetailPage({
           >
             <Star
               className={cn(
-                "h-[18px] w-[18px] transition-colors",
+                "h-[17px] w-[17px] transition-colors",
                 memory.is_favorite
                   ? "fill-amber-400 text-amber-400"
-                  : "text-muted-foreground hover:text-amber-400"
+                  : "text-muted-foreground/60 hover:text-amber-400"
               )}
             />
           </button>
           <button
             onClick={handleDelete}
-            className="p-2.5 rounded-xl hover:bg-red-50 text-muted-foreground hover:text-destructive transition-all"
+            className="p-2.5 rounded-xl hover:bg-red-50 text-muted-foreground/60 hover:text-destructive transition-all"
             title="Ta bort"
           >
-            <Trash2 className="h-[18px] w-[18px]" />
+            <Trash2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
           </button>
         </div>
       </div>
@@ -131,43 +131,44 @@ export default function MemoryDetailPage({
       <div>
         <span
           className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold mb-3",
+            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold mb-4",
             config.badgeClass
           )}
         >
-          <ContentTypeIcon type={memory.content_type} className="h-3.5 w-3.5" />
+          <ContentTypeIcon type={memory.content_type} className="h-3 w-3" />
           {config.label}
         </span>
-        <h1 className="text-2xl font-extrabold tracking-tight leading-tight">
+        <h1 className="heading-serif text-[28px] md:text-[34px] leading-[1.15] text-foreground">
           {memory.title}
         </h1>
-        <div className="flex items-center gap-4 mt-3">
-          <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground font-medium">
-            <Calendar className="h-3.5 w-3.5" />
-            {format(new Date(memory.created_at), "d MMMM yyyy", {
-              locale: sv,
-            })}
+        <div className="flex items-center gap-4 mt-4 flex-wrap">
+          <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground/70 font-medium">
+            <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} />
+            {format(new Date(memory.created_at), "d MMMM yyyy", { locale: sv })}
           </div>
-          <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground font-medium">
-            <Clock className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground/70 font-medium">
+            <Clock className="h-3.5 w-3.5" strokeWidth={1.5} />
             {format(new Date(memory.created_at), "HH:mm")}
           </div>
-          <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground font-medium">
-            <Hash className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground/70 font-medium">
+            <Hash className="h-3.5 w-3.5" strokeWidth={1.5} />
             {memory.source}
           </div>
           {memory.original_content && memory.original_content.length > 200 && (
-            <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground font-medium">
-              <BookOpen className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground/70 font-medium">
+              <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
               {Math.max(1, Math.round(memory.original_content.split(/\s+/).length / 200))} min lästid
             </div>
           )}
         </div>
       </div>
 
+      {/* Divider */}
+      <div className="h-px bg-border/60" />
+
       {/* Image */}
       {memory.content_type === "image" && memory.image_url && (
-        <div className="rounded-2xl overflow-hidden border border-border">
+        <div className="rounded-2xl overflow-hidden border border-border/60">
           <img
             src={memory.image_url}
             alt={memory.title}
@@ -186,7 +187,7 @@ export default function MemoryDetailPage({
         <SocialPreview type={memory.content_type} linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
 
-      {/* Link preview (for link type with metadata) */}
+      {/* Link preview */}
       {memory.content_type === "link" && memory.link_url && memory.link_metadata?.og_image && (
         <LinkPreview linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
@@ -197,23 +198,17 @@ export default function MemoryDetailPage({
           href={memory.link_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-border bg-card hover:bg-accent/50 transition-all group"
+          className="flex items-center gap-3.5 px-5 py-4 rounded-2xl border border-border/60 bg-card hover:bg-accent/50 transition-all group"
         >
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-type-link/8">
-            <ExternalLink className="h-4 w-4 text-type-link" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-type-link/8">
+            <ExternalLink className="h-4 w-4 text-type-link" strokeWidth={1.5} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-semibold text-type-link truncate group-hover:underline">
               {memory.link_url}
             </p>
-            <p className="text-[11px] text-muted-foreground">
-              {(() => {
-                try {
-                  return new URL(memory.link_url).hostname;
-                } catch {
-                  return "extern länk";
-                }
-              })()}
+            <p className="text-[11px] text-muted-foreground/60">
+              {(() => { try { return new URL(memory.link_url).hostname.replace('www.', ''); } catch { return "extern länk"; } })()}
             </p>
           </div>
         </a>
@@ -221,8 +216,8 @@ export default function MemoryDetailPage({
 
       {/* Summary */}
       {memory.summary && (
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+        <div className="rounded-2xl border border-border/60 bg-card p-7">
+          <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-4">
             Sammanfattning
           </h2>
           <MarkdownContent content={memory.summary} />
@@ -231,8 +226,8 @@ export default function MemoryDetailPage({
 
       {/* Original content */}
       {memory.original_content && (
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+        <div className="rounded-2xl border border-border/60 bg-card p-7">
+          <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-4">
             Innehåll
           </h2>
           <MarkdownContent content={memory.original_content} />
@@ -248,14 +243,14 @@ export default function MemoryDetailPage({
       {/* Tags */}
       {memory.tags && memory.tags.length > 0 && (
         <div>
-          <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+          <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
             Taggar
           </h2>
           <div className="flex flex-wrap gap-2">
             {memory.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold bg-muted text-muted-foreground"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium bg-accent text-muted-foreground border border-border/40"
               >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
@@ -269,13 +264,11 @@ export default function MemoryDetailPage({
       )}
 
       {/* Metadata footer */}
-      <div className="flex items-center gap-6 text-[11px] text-muted-foreground/50 pt-6 border-t border-border font-medium">
+      <div className="flex items-center gap-6 text-[11px] text-muted-foreground/35 pt-8 border-t border-border/40 font-medium">
         <span>ID: {memory.id.slice(0, 8)}...</span>
         <span>
           Uppdaterad:{" "}
-          {format(new Date(memory.updated_at), "d MMM yyyy, HH:mm", {
-            locale: sv,
-          })}
+          {format(new Date(memory.updated_at), "d MMM yyyy, HH:mm", { locale: sv })}
         </span>
       </div>
     </div>

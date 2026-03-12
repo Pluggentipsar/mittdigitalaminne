@@ -29,7 +29,7 @@ export const contentTypeConfig: Record<
     bgColor: "bg-type-image/8",
     borderColor: "border-l-type-image",
     badgeClass: "badge-type-image",
-    hex: "#e2590c",
+    hex: "#d97706",
   },
   link: {
     label: "Länk",
@@ -37,7 +37,7 @@ export const contentTypeConfig: Record<
     bgColor: "bg-type-link/8",
     borderColor: "border-l-type-link",
     badgeClass: "badge-type-link",
-    hex: "#0273b0",
+    hex: "#0369a1",
   },
   article: {
     label: "Artikel",
@@ -45,7 +45,7 @@ export const contentTypeConfig: Record<
     bgColor: "bg-type-article/8",
     borderColor: "border-l-type-article",
     badgeClass: "badge-type-article",
-    hex: "#058c5a",
+    hex: "#047857",
   },
   thought: {
     label: "Tanke",
@@ -61,7 +61,7 @@ export const contentTypeConfig: Record<
     bgColor: "bg-type-youtube/8",
     borderColor: "border-l-type-youtube",
     badgeClass: "badge-type-youtube",
-    hex: "#cc181e",
+    hex: "#dc2626",
   },
   linkedin: {
     label: "LinkedIn",
@@ -77,6 +77,6 @@ export const contentTypeConfig: Record<
     bgColor: "bg-type-instagram/8",
     borderColor: "border-l-type-instagram",
     badgeClass: "badge-type-instagram",
-    hex: "#e1306c",
+    hex: "#db2777",
   },
 };

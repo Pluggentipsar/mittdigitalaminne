@@ -24,50 +24,52 @@
   --color-type-youtube: var(--type-youtube);
   --color-type-linkedin: var(--type-linkedin);
   --color-type-instagram: var(--type-instagram);
-  --font-sans: var(--font-jakarta);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
 }
 
 :root {
-  /* Warm linen palette */
-  --background: #f7f5f0;
-  --foreground: #1a1814;
-  --muted: #efeae2;
-  --muted-foreground: #8c857a;
-  --border: #e3ddd3;
+  /* Warm parchment palette */
+  --background: #faf8f5;
+  --foreground: #1c1917;
+  --muted: #f0ece6;
+  --muted-foreground: #87817a;
+  --border: #e7e2da;
   --card: #ffffff;
-  --card-foreground: #1a1814;
+  --card-foreground: #1c1917;
 
-  /* Deep violet — memory / brain theme */
-  --primary: #6d28d9;
+  /* Rich amber — memories preserved in amber */
+  --primary: #b45309;
   --primary-foreground: #ffffff;
 
   /* Accent — warm highlight */
-  --accent: #efeae2;
-  --accent-foreground: #1a1814;
+  --accent: #f5f0e8;
+  --accent-foreground: #1c1917;
 
-  /* Sidebar — dark warm charcoal */
-  --sidebar: #1a1814;
-  --sidebar-foreground: #f7f5f0;
-  --sidebar-muted: rgba(247, 245, 240, 0.06);
-  --sidebar-active: rgba(109, 40, 217, 0.12);
+  /* Sidebar — deep ink */
+  --sidebar: #0f0f0e;
+  --sidebar-foreground: #faf8f5;
+  --sidebar-muted: rgba(250, 248, 245, 0.06);
+  --sidebar-active: rgba(180, 83, 9, 0.12);
 
-  /* Semantic: content types */
-  --type-image: #e2590c;
-  --type-link: #0273b0;
-  --type-article: #058c5a;
+  /* Semantic: content types — refined palette */
+  --type-image: #d97706;
+  --type-link: #0369a1;
+  --type-article: #047857;
   --type-thought: #7c3aed;
-  --type-youtube: #cc181e;
+  --type-youtube: #dc2626;
   --type-linkedin: #0a66c2;
-  --type-instagram: #e1306c;
+  --type-instagram: #db2777;
 
   /* Danger / delete */
   --destructive: #dc2626;
 
   /* Misc */
   --radius: 12px;
-  --shadow-sm: 0 1px 2px rgba(26, 24, 20, 0.04);
-  --shadow-md: 0 4px 12px rgba(26, 24, 20, 0.06), 0 1px 3px rgba(26, 24, 20, 0.04);
-  --shadow-lg: 0 8px 24px rgba(26, 24, 20, 0.08), 0 2px 6px rgba(26, 24, 20, 0.04);
+  --shadow-xs: 0 1px 2px rgba(28, 25, 23, 0.03);
+  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.02);
+  --shadow-md: 0 4px 16px rgba(28, 25, 23, 0.06), 0 1px 4px rgba(28, 25, 23, 0.03);
+  --shadow-lg: 0 12px 32px rgba(28, 25, 23, 0.08), 0 4px 8px rgba(28, 25, 23, 0.03);
 }
 
 /* ─── Base ─────────────────────────────────────────────────────── */
@@ -78,8 +80,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Subtle grain texture */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
 ::selection {
-  background: rgba(109, 40, 217, 0.15);
+  background: rgba(180, 83, 9, 0.12);
   color: var(--foreground);
 }
 
@@ -106,11 +121,25 @@ body {
   background: var(--muted-foreground);
 }
 
+/* ─── Typography helpers ──────────────────────────────────────── */
+.heading-serif {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.heading-serif-italic {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
 /* ─── Animations ───────────────────────────────────────────────── */
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -118,16 +147,40 @@ body {
   }
 }
 
-.animate-fade-in {
-  animation: fade-in-up 0.4s ease-out both;
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.3s; }
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-slide-in {
+  animation: slide-in-left 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.20s; }
+.stagger-6 { animation-delay: 0.24s; }
 
 /* ─── Skeleton shimmer ─────────────────────────────────────────── */
 @keyframes skeleton-shimmer {
@@ -139,22 +192,31 @@ body {
   background: linear-gradient(
     90deg,
     var(--muted) 25%,
-    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.5) 50%,
     var(--muted) 75%
   );
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  animation: skeleton-shimmer 2s ease-in-out infinite;
   border-radius: 8px;
 }
 
-/* ─── Content type badges ──────────────────────────────────────── */
-.badge-type-image { background: rgba(226, 89, 12, 0.08); color: #c04d0a; }
-.badge-type-link { background: rgba(2, 115, 176, 0.08); color: #026498; }
-.badge-type-article { background: rgba(5, 140, 90, 0.08); color: #047a4e; }
+/* ─── Content type badges — refined ───────────────────────────── */
+.badge-type-image { background: rgba(217, 119, 6, 0.08); color: #b45309; }
+.badge-type-link { background: rgba(3, 105, 161, 0.08); color: #0369a1; }
+.badge-type-article { background: rgba(4, 120, 87, 0.08); color: #047857; }
 .badge-type-thought { background: rgba(124, 58, 237, 0.08); color: #6d28d9; }
-.badge-type-youtube { background: rgba(204, 24, 30, 0.08); color: #b01419; }
+.badge-type-youtube { background: rgba(220, 38, 38, 0.08); color: #b91c1c; }
 .badge-type-linkedin { background: rgba(10, 102, 194, 0.08); color: #0858a1; }
-.badge-type-instagram { background: rgba(225, 48, 108, 0.08); color: #c42a5e; }
+.badge-type-instagram { background: rgba(219, 39, 119, 0.08); color: #be185d; }
+
+/* ─── Card hover ──────────────────────────────────────────────── */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
 
 /* ─── Scrollbar-none utility ───────────────────────────────────── */
 .scrollbar-none {
@@ -167,5 +229,5 @@ body {
 
 /* ─── Recharts override ────────────────────────────────────────── */
 .recharts-text {
-  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
 }

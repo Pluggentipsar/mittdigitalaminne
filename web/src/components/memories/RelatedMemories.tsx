@@ -12,7 +12,7 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+        <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
           Relaterade minnen
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -28,7 +28,7 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
 
   return (
     <div>
-      <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+      <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
         Relaterade minnen
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -38,7 +38,7 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
             <Link
               key={related.id}
               href={`/minnen/${related.id}`}
-              className="group rounded-xl border border-border bg-card p-4 hover:shadow-sm hover:border-border/80 transition-all"
+              className="group rounded-xl border border-border/60 bg-card p-4 card-hover"
             >
               <div className="flex items-start gap-3">
                 <div
@@ -57,11 +57,11 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
                     {related.title}
                   </p>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground/60">
-                      <Tag className="h-2.5 w-2.5" />
+                    <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground/50">
+                      <Tag className="h-2.5 w-2.5" strokeWidth={1.5} />
                       {related.shared_tag_count} gemensamma
                     </span>
-                    <span className="text-[10px] text-muted-foreground/40">
+                    <span className="text-[10px] text-muted-foreground/35">
                       {relativeDate(related.created_at)}
                     </span>
                   </div>

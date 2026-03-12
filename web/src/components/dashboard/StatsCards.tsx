@@ -14,32 +14,32 @@ const cards = [
     label: "Totalt",
     getValue: (s: MemoryStats) => s.total,
     icon: Library,
-    iconColor: "text-type-link",
-    iconBg: "bg-type-link/8",
+    accent: "text-amber-700",
+    accentBg: "bg-amber-50",
   },
   {
     key: "week",
     label: "Denna vecka",
     getValue: (s: MemoryStats) => s.this_week,
     icon: CalendarDays,
-    iconColor: "text-type-article",
-    iconBg: "bg-type-article/8",
+    accent: "text-emerald-700",
+    accentBg: "bg-emerald-50",
   },
   {
     key: "favorites",
     label: "Favoriter",
     getValue: (s: MemoryStats) => s.favorites,
     icon: Star,
-    iconColor: "text-amber-500",
-    iconBg: "bg-amber-50",
+    accent: "text-orange-600",
+    accentBg: "bg-orange-50",
   },
   {
     key: "tags",
     label: "Taggar",
     getValue: (s: MemoryStats) => s.top_tags?.length ?? 0,
     icon: Tags,
-    iconColor: "text-type-thought",
-    iconBg: "bg-type-thought/8",
+    accent: "text-violet-600",
+    accentBg: "bg-violet-50",
   },
 ];
 
@@ -50,25 +50,25 @@ export function StatsCards({ stats }: StatsCardsProps) {
         <div
           key={card.key}
           className={cn(
-            "group relative rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(26,24,20,0.06)] hover:-translate-y-0.5 animate-fade-in overflow-hidden",
+            "group relative rounded-2xl border border-border/80 bg-card p-5 card-hover animate-fade-in overflow-hidden",
             `stagger-${i + 1}`
           )}
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[13px] font-medium text-muted-foreground">
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-[12px] font-medium text-muted-foreground tracking-wide">
               {card.label}
             </span>
             <div
               className={cn(
-                "flex items-center justify-center w-9 h-9 rounded-xl transition-transform duration-300 group-hover:scale-110",
-                card.iconBg
+                "flex items-center justify-center w-8 h-8 rounded-lg transition-transform duration-300 group-hover:scale-110",
+                card.accentBg
               )}
             >
-              <card.icon className={cn("h-[18px] w-[18px]", card.iconColor)} />
+              <card.icon className={cn("h-4 w-4", card.accent)} strokeWidth={1.5} />
             </div>
           </div>
-          <p className="text-3xl font-extrabold tracking-tight">
-            {stats ? card.getValue(stats) : <span className="skeleton inline-block w-10 h-8" />}
+          <p className="heading-serif text-[36px] leading-none tracking-tight">
+            {stats ? card.getValue(stats) : <span className="skeleton inline-block w-10 h-9" />}
           </p>
         </div>
       ))}
