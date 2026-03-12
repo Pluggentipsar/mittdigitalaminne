@@ -19,7 +19,11 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
     <div className="group relative animate-fade-in">
       <Link
         href={`/minnen/${memory.id}`}
-        className="block rounded-2xl border border-border/70 bg-card overflow-hidden card-hover"
+        className={cn(
+          "block rounded-2xl border border-border/60 bg-card overflow-hidden",
+          `accent-line-top accent-line-${memory.content_type}`,
+          `card-glow-${memory.content_type}`
+        )}
       >
         {/* Image preview */}
         {memory.content_type === "image" && memory.image_url && (
@@ -27,24 +31,26 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
             <img
               src={memory.image_url}
               alt={memory.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             />
           </div>
         )}
 
         {/* Link OG image */}
         {memory.content_type !== "image" && memory.link_metadata?.og_image && (
-          <div className="aspect-[2.2/1] bg-muted overflow-hidden">
+          <div className="aspect-[2.2/1] bg-muted overflow-hidden relative">
             <img
               src={memory.link_metadata.og_image}
               alt=""
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             />
+            {/* Subtle gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
         )}
 
         <div className="p-5">
-          {/* Top row: type badge + actions */}
+          {/* Type badge + actions */}
           <div className="flex items-center justify-between gap-2 mb-3">
             <span
               className={cn(
@@ -101,28 +107,28 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
 
           {/* Summary */}
           {memory.summary && (
-            <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">
+            <p className="text-[12px] text-muted-foreground/70 leading-relaxed line-clamp-2 mb-3">
               {memory.summary}
             </p>
           )}
 
-          {/* Link preview */}
+          {/* Link */}
           {memory.link_url && (
-            <div className="flex items-center gap-1.5 mb-3 text-[11px] text-muted-foreground/60 font-medium">
-              <ExternalLink className="h-3 w-3 shrink-0" />
+            <div className="flex items-center gap-1.5 mb-3 text-[11px] text-muted-foreground/50 font-medium">
+              <ExternalLink className="h-3 w-3 shrink-0" strokeWidth={1.5} />
               <span className="truncate">
                 {(() => { try { return new URL(memory.link_url).hostname.replace('www.', ''); } catch { return memory.link_url; } })()}
               </span>
             </div>
           )}
 
-          {/* Footer: tags + date */}
-          <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/50">
+          {/* Footer */}
+          <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/40">
             <div className="flex flex-wrap gap-1">
               {(memory.tags || []).slice(0, 3).map((tag) => (
                 <span
                   key={tag.id}
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-accent text-muted-foreground"
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-accent/80 text-muted-foreground"
                 >
                   <span
                     className="w-1.5 h-1.5 rounded-full shrink-0"
@@ -132,12 +138,12 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
                 </span>
               ))}
               {(memory.tags || []).length > 3 && (
-                <span className="text-[9px] text-muted-foreground/50 font-medium px-1">
+                <span className="text-[9px] text-muted-foreground/40 font-medium px-1">
                   +{(memory.tags || []).length - 3}
                 </span>
               )}
             </div>
-            <span className="text-[10px] text-muted-foreground/45 whitespace-nowrap font-medium">
+            <span className="text-[10px] text-muted-foreground/40 whitespace-nowrap font-medium tabular-nums">
               {relativeDate(memory.created_at)}
             </span>
           </div>

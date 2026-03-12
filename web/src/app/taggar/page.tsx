@@ -11,15 +11,19 @@ export default function TaggarPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <p className="text-[11px] font-semibold text-primary/60 uppercase tracking-[0.15em] mb-2">
+        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
           Organisering
         </p>
-        <h1 className="heading-serif text-[32px] md:text-[38px] text-foreground leading-[1.1]">
+        <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
           Taggar
         </h1>
-        <p className="text-[14px] text-muted-foreground mt-2">
+        <p className="text-[14px] text-muted-foreground/70 mt-2.5">
           Hantera dina taggar och se fördelningen
         </p>
+
+        <div className="divider-ornament mt-7 max-w-xs">
+          <span className="text-primary/30 text-[8px]">&#9670;</span>
+        </div>
       </div>
 
       {isLoading ? (
@@ -50,11 +54,11 @@ export default function TaggarPage() {
               return (
                 <div
                   key={tag.id}
-                  className={`group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 card-hover animate-fade-in stagger-${Math.min(i + 1, 6)}`}
+                  className={`group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 card-hover animate-scale-in stagger-${Math.min(i + 1, 8)}`}
                 >
                   {/* Background bar */}
                   <div
-                    className="absolute inset-0 opacity-[0.035] transition-all duration-500"
+                    className="absolute inset-0 opacity-[0.03] transition-opacity duration-500 group-hover:opacity-[0.06]"
                     style={{
                       background: `linear-gradient(90deg, ${tag.color} ${barWidth}%, transparent ${barWidth}%)`,
                     }}
@@ -63,10 +67,10 @@ export default function TaggarPage() {
                   <div className="relative flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-3 h-3 rounded-full shrink-0"
+                        className="w-3 h-3 rounded-full shrink-0 transition-transform duration-300 group-hover:scale-125"
                         style={{
                           backgroundColor: tag.color,
-                          boxShadow: `0 0 0 2px var(--card), 0 0 0 3.5px ${tag.color}25`,
+                          boxShadow: `0 0 0 2px var(--card), 0 0 0 3.5px ${tag.color}20`,
                         }}
                       />
                       <span className="font-semibold text-[14px]">{tag.name}</span>
@@ -75,7 +79,7 @@ export default function TaggarPage() {
                       <span className="text-[14px] font-semibold tabular-nums">
                         {count}
                       </span>
-                      <span className="text-[11px] text-muted-foreground/60 font-medium">
+                      <span className="text-[11px] text-muted-foreground/50 font-medium">
                         {count === 1 ? "minne" : "minnen"}
                       </span>
                     </div>

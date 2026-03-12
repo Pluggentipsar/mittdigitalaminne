@@ -8,23 +8,36 @@ import { TypeDistribution } from "@/components/dashboard/TypeDistribution";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 6) return "God natt";
+  if (hour < 12) return "God morgon";
+  if (hour < 17) return "God eftermiddag";
+  return "God kväll";
+}
+
 export default function DashboardPage() {
   const { data } = useSWR<{ data: MemoryStats }>("/api/statistics", fetcher);
   const stats = data?.data ?? null;
 
   return (
     <div className="space-y-10">
-      {/* Header */}
+      {/* Hero greeting */}
       <div className="animate-fade-in">
-        <p className="text-[11px] font-semibold text-primary/60 uppercase tracking-[0.15em] mb-2">
-          Översikt
+        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
+          {getGreeting()}
         </p>
-        <h1 className="heading-serif text-[32px] md:text-[38px] text-foreground leading-[1.1]">
-          Dashboard
+        <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
+          Ditt kunskapsarkiv
         </h1>
-        <p className="text-[14px] text-muted-foreground mt-2 max-w-md">
-          Ditt digitala kunskapsarkiv samlat på ett ställe.
+        <p className="text-[14px] text-muted-foreground/70 mt-2.5 max-w-lg leading-relaxed">
+          Allt du sparat, organiserat och redo att utforska.
         </p>
+
+        {/* Decorative divider */}
+        <div className="divider-ornament mt-7 max-w-md">
+          <span className="text-primary/40">&#9670;</span>
+        </div>
       </div>
 
       <StatsCards stats={stats} />

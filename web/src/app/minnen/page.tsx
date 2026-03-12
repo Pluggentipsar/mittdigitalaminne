@@ -46,19 +46,23 @@ function MinnenContent() {
   return (
     <div className="space-y-8">
       <div className="animate-fade-in">
-        <p className="text-[11px] font-semibold text-primary/60 uppercase tracking-[0.15em] mb-2">
+        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
           Samling
         </p>
-        <h1 className="heading-serif text-[32px] md:text-[38px] text-foreground leading-[1.1]">
+        <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
           {activeSpaceName || "Minnen"}
         </h1>
-        <p className="text-[14px] text-muted-foreground mt-2">
+        <p className="text-[14px] text-muted-foreground/70 mt-2.5">
           {activeSpaceName
             ? `${count} minnen i detta space`
             : count > 0
             ? `${count} sparade minnen`
             : "Bläddra och sök bland dina minnen"}
         </p>
+
+        <div className="divider-ornament mt-7 max-w-md">
+          <span className="text-primary/30 text-[8px]">&#9670;</span>
+        </div>
       </div>
 
       <FilterBar filters={filters} onFiltersChange={setFilters} />
@@ -68,7 +72,7 @@ function MinnenContent() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-2xl border border-border/70 bg-card overflow-hidden"
+              className="rounded-2xl border border-border/60 bg-card overflow-hidden"
             >
               <div className="skeleton h-36 w-full rounded-none" />
               <div className="p-5">

@@ -13,9 +13,12 @@ import {
   Folder,
   Trash2,
   Zap,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpaces } from "@/hooks/useSpaces";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -28,6 +31,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { spaces, deleteSpace } = useSpaces();
+  const { collapsed, toggle } = useSidebar();
 
   useEffect(() => {
     setMobileOpen(false);
@@ -44,12 +48,14 @@ export function Sidebar() {
     };
   }, [mobileOpen]);
 
-  const sidebarContent = (
+  /* ── Mobile sidebar content (always expanded) ───────────────── */
+  const mobileSidebarContent = (
     <>
-      {/* Logo */}
+      {/* Logo area */}
       <div className="flex items-center gap-3.5 px-7 pt-7 pb-6">
-        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/15">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-amber-400">
+        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/15">
+          <div className="absolute inset-0 rounded-xl bg-amber-400/10 blur-[6px]" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="relative text-amber-400">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" opacity="0.6"/>
             <circle cx="12" cy="12" r="3" fill="currentColor"/>
           </svg>
@@ -58,60 +64,158 @@ export function Sidebar() {
           <h1 className="heading-serif text-[18px] text-sidebar-foreground leading-none">
             Mitt Minne
           </h1>
-          <p className="text-[10px] text-sidebar-foreground/30 font-medium mt-0.5 tracking-wide">
+          <p className="text-[10px] text-sidebar-foreground/25 font-medium mt-0.5 tracking-wide">
             Kunskapsarkiv
           </p>
         </div>
         <button
           onClick={() => setMobileOpen(false)}
-          className="ml-auto p-2 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground/80 hover:bg-sidebar-foreground/10 transition-colors md:hidden"
+          className="ml-auto p-2 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground/80 hover:bg-sidebar-foreground/10 transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-4 py-1 space-y-0.5">
-        <p className="px-3 mb-2 text-[10px] font-semibold text-sidebar-foreground/25 uppercase tracking-[0.12em]">
+        <p className="px-3 mb-2.5 text-[9px] font-bold text-sidebar-foreground/20 uppercase tracking-[0.15em]">
           Meny
         </p>
         {navItems.map((item) => {
-          const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
+          const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200",
                 isActive
                   ? "bg-sidebar-active text-amber-400"
-                  : "text-sidebar-foreground/45 hover:text-sidebar-foreground/80 hover:bg-sidebar-muted"
+                  : "text-sidebar-foreground/40 hover:text-sidebar-foreground/75 hover:bg-sidebar-muted"
               )}
             >
+              {isActive && <div className="absolute inset-0 rounded-xl bg-amber-500/8 blur-[4px]" />}
+              <item.icon
+                className={cn("relative h-[17px] w-[17px] transition-colors", isActive ? "text-amber-400" : "text-sidebar-foreground/25 group-hover:text-sidebar-foreground/50")}
+                strokeWidth={isActive ? 2 : 1.5}
+              />
+              <span className="relative">{item.label}</span>
+              {isActive && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
+            </Link>
+          );
+        })}
+
+        {spaces.length > 0 && (
+          <div className="pt-5">
+            <p className="px-3 mb-2.5 text-[9px] font-bold text-sidebar-foreground/20 uppercase tracking-[0.15em]">
+              Spaces
+            </p>
+            <div className="space-y-0.5">
+              {spaces.map((space) => {
+                const spaceHref = `/minnen?space=${space.id}`;
+                const isActive = pathname === "/minnen" && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("space") === space.id;
+                return (
+                  <Link key={space.id} href={spaceHref} className={cn("group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[12px] font-medium transition-all duration-200", isActive ? "bg-sidebar-active text-amber-400" : "text-sidebar-foreground/40 hover:text-sidebar-foreground/75 hover:bg-sidebar-muted")}>
+                    {isActive && <div className="absolute inset-0 rounded-xl bg-amber-500/8 blur-[4px]" />}
+                    <Folder className={cn("relative h-4 w-4 shrink-0 transition-colors", isActive ? "text-amber-400" : "text-sidebar-foreground/25 group-hover:text-sidebar-foreground/50")} strokeWidth={1.5} />
+                    <span className="relative flex-1 truncate">{space.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      <div className="px-5 py-5">
+        <div className="relative rounded-xl overflow-hidden px-4 py-3.5 border border-sidebar-foreground/[0.04]">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.06] via-transparent to-amber-500/[0.02]" />
+          <div className="relative flex items-center gap-2 mb-1">
+            <div className="relative">
+              <Zap className="h-3 w-3 text-amber-400/80" />
+              <div className="absolute inset-0 bg-amber-400/30 blur-[3px]" />
+            </div>
+            <span className="text-[10px] font-semibold text-sidebar-foreground/30 uppercase tracking-wider">
+              MCP Ansluten
+            </span>
+          </div>
+          <p className="relative text-[10px] text-sidebar-foreground/18 leading-relaxed">
+            Spara minnen via Claude AI
+          </p>
+        </div>
+      </div>
+    </>
+  );
+
+  /* ── Desktop sidebar content (collapsed-aware) ──────────────── */
+  const desktopSidebarContent = (
+    <>
+      {/* Logo area */}
+      <div className={cn("flex items-center pt-7 pb-6 transition-all duration-300", collapsed ? "justify-center px-0" : "gap-3.5 px-7")}>
+        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/15 shrink-0">
+          <div className="absolute inset-0 rounded-xl bg-amber-400/10 blur-[6px]" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="relative text-amber-400">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" opacity="0.6"/>
+            <circle cx="12" cy="12" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        {!collapsed && (
+          <div className="animate-fade min-w-0">
+            <h1 className="heading-serif text-[18px] text-sidebar-foreground leading-none">
+              Mitt Minne
+            </h1>
+            <p className="text-[10px] text-sidebar-foreground/25 font-medium mt-0.5 tracking-wide">
+              Kunskapsarkiv
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className={cn("flex-1 py-1 space-y-0.5 transition-all duration-300", collapsed ? "px-2" : "px-4")}>
+        {!collapsed && (
+          <p className="px-3 mb-2.5 text-[9px] font-bold text-sidebar-foreground/20 uppercase tracking-[0.15em]">
+            Meny
+          </p>
+        )}
+        {navItems.map((item) => {
+          const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed ? item.label : undefined}
+              className={cn(
+                "group relative flex items-center rounded-xl text-[13px] font-medium transition-all duration-200",
+                collapsed
+                  ? "justify-center px-0 py-2.5"
+                  : "gap-3 px-3 py-2.5",
+                isActive
+                  ? "bg-sidebar-active text-amber-400"
+                  : "text-sidebar-foreground/40 hover:text-sidebar-foreground/75 hover:bg-sidebar-muted"
+              )}
+            >
+              {isActive && <div className="absolute inset-0 rounded-xl bg-amber-500/8 blur-[4px]" />}
               <item.icon
                 className={cn(
-                  "h-[17px] w-[17px] transition-colors",
-                  isActive
-                    ? "text-amber-400"
-                    : "text-sidebar-foreground/30 group-hover:text-sidebar-foreground/55"
+                  "relative h-[17px] w-[17px] transition-colors shrink-0",
+                  isActive ? "text-amber-400" : "text-sidebar-foreground/25 group-hover:text-sidebar-foreground/50"
                 )}
                 strokeWidth={isActive ? 2 : 1.5}
               />
-              {item.label}
-              {isActive && (
-                <div className="ml-auto w-1 h-4 rounded-full bg-amber-400/60" />
+              {!collapsed && (
+                <>
+                  <span className="relative">{item.label}</span>
+                  {isActive && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
+                </>
               )}
             </Link>
           );
         })}
 
-        {/* Spaces */}
-        {spaces.length > 0 && (
-          <div className="pt-5">
-            <p className="px-3 mb-2 text-[10px] font-semibold text-sidebar-foreground/25 uppercase tracking-[0.12em]">
+        {/* Spaces — hidden in collapsed mode */}
+        {!collapsed && spaces.length > 0 && (
+          <div className="pt-5 animate-fade">
+            <p className="px-3 mb-2.5 text-[9px] font-bold text-sidebar-foreground/20 uppercase tracking-[0.15em]">
               Spaces
             </p>
             <div className="space-y-0.5">
@@ -120,31 +224,26 @@ export function Sidebar() {
                 const isActive =
                   pathname === "/minnen" &&
                   typeof window !== "undefined" &&
-                  new URLSearchParams(window.location.search).get("space") ===
-                    space.id;
+                  new URLSearchParams(window.location.search).get("space") === space.id;
                 return (
                   <Link
                     key={space.id}
                     href={spaceHref}
                     className={cn(
-                      "group flex items-center gap-3 rounded-xl px-3 py-2 text-[12px] font-medium transition-all duration-200",
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[12px] font-medium transition-all duration-200",
                       isActive
                         ? "bg-sidebar-active text-amber-400"
-                        : "text-sidebar-foreground/45 hover:text-sidebar-foreground/80 hover:bg-sidebar-muted"
+                        : "text-sidebar-foreground/40 hover:text-sidebar-foreground/75 hover:bg-sidebar-muted"
                     )}
                   >
+                    {isActive && <div className="absolute inset-0 rounded-xl bg-amber-500/8 blur-[4px]" />}
                     <Folder
-                      className={cn(
-                        "h-4 w-4 shrink-0 transition-colors",
-                        isActive
-                          ? "text-amber-400"
-                          : "text-sidebar-foreground/30 group-hover:text-sidebar-foreground/55"
-                      )}
+                      className={cn("relative h-4 w-4 shrink-0 transition-colors", isActive ? "text-amber-400" : "text-sidebar-foreground/25 group-hover:text-sidebar-foreground/50")}
                       strokeWidth={1.5}
                     />
-                    <span className="flex-1 truncate">{space.name}</span>
+                    <span className="relative flex-1 truncate">{space.name}</span>
                     {typeof space.memory_count === "number" && (
-                      <span className="text-[10px] font-medium text-sidebar-foreground/20 tabular-nums">
+                      <span className="relative text-[10px] font-medium text-sidebar-foreground/18 tabular-nums">
                         {space.memory_count}
                       </span>
                     )}
@@ -156,7 +255,7 @@ export function Sidebar() {
                           deleteSpace(space.id);
                         }
                       }}
-                      className="hidden group-hover:flex items-center justify-center w-5 h-5 rounded-md hover:bg-red-500/20 text-sidebar-foreground/25 hover:text-red-400 transition-colors"
+                      className="relative hidden group-hover:flex items-center justify-center w-5 h-5 rounded-md hover:bg-red-500/20 text-sidebar-foreground/25 hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
@@ -169,18 +268,54 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="px-5 py-5">
-        <div className="rounded-xl bg-gradient-to-br from-amber-500/[0.06] to-transparent px-4 py-3 border border-sidebar-foreground/[0.04]">
-          <div className="flex items-center gap-2 mb-1">
-            <Zap className="h-3 w-3 text-amber-400/70" />
-            <span className="text-[10px] font-semibold text-sidebar-foreground/35 uppercase tracking-wider">
-              MCP Ansluten
-            </span>
+      {!collapsed ? (
+        <div className="px-5 py-5 animate-fade">
+          <div className="relative rounded-xl overflow-hidden px-4 py-3.5 border border-sidebar-foreground/[0.04]">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.06] via-transparent to-amber-500/[0.02]" />
+            <div className="relative flex items-center gap-2 mb-1">
+              <div className="relative">
+                <Zap className="h-3 w-3 text-amber-400/80" />
+                <div className="absolute inset-0 bg-amber-400/30 blur-[3px]" />
+              </div>
+              <span className="text-[10px] font-semibold text-sidebar-foreground/30 uppercase tracking-wider">
+                MCP Ansluten
+              </span>
+            </div>
+            <p className="relative text-[10px] text-sidebar-foreground/18 leading-relaxed">
+              Spara minnen via Claude AI
+            </p>
           </div>
-          <p className="text-[10px] text-sidebar-foreground/20 leading-relaxed">
-            Spara minnen via Claude AI
-          </p>
         </div>
+      ) : (
+        <div className="flex justify-center py-5">
+          <div className="relative" title="MCP Ansluten">
+            <Zap className="h-3.5 w-3.5 text-amber-400/60" />
+            <div className="absolute inset-0 bg-amber-400/20 blur-[3px]" />
+          </div>
+        </div>
+      )}
+
+      {/* Collapse toggle button */}
+      <div className={cn("border-t border-sidebar-foreground/[0.04] transition-all duration-300", collapsed ? "px-2 py-3" : "px-5 py-3")}>
+        <button
+          onClick={toggle}
+          className={cn(
+            "flex items-center rounded-lg text-sidebar-foreground/25 hover:text-sidebar-foreground/50 hover:bg-sidebar-foreground/5 transition-all duration-200",
+            collapsed
+              ? "justify-center w-full py-2"
+              : "gap-2.5 px-3 py-2 w-full"
+          )}
+          title={collapsed ? "Expandera sidebar" : "Kollapsa sidebar"}
+        >
+          {collapsed ? (
+            <ChevronsRight className="h-4 w-4" strokeWidth={1.5} />
+          ) : (
+            <>
+              <ChevronsLeft className="h-4 w-4" strokeWidth={1.5} />
+              <span className="text-[11px] font-medium">Kollapsa</span>
+            </>
+          )}
+        </button>
       </div>
     </>
   );
@@ -222,12 +357,17 @@ export function Sidebar() {
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {sidebarContent}
+        {mobileSidebarContent}
       </aside>
 
-      {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-[272px] bg-sidebar hidden md:flex flex-col border-r border-white/[0.03]">
-        {sidebarContent}
+      {/* Desktop sidebar — width animates between 272px and 72px */}
+      <aside
+        className="fixed left-0 top-0 z-40 h-screen bg-sidebar hidden md:flex flex-col border-r border-white/[0.03] transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden"
+        style={{ width: collapsed ? 72 : 272 }}
+      >
+        {/* Subtle amber accent at top */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+        {desktopSidebarContent}
       </aside>
     </>
   );

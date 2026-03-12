@@ -12,7 +12,7 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
+        <h2 className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.12em] mb-3">
           Relaterade minnen
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -28,7 +28,7 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
 
   return (
     <div>
-      <h2 className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
+      <h2 className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.12em] mb-3">
         Relaterade minnen
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -38,12 +38,15 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
             <Link
               key={related.id}
               href={`/minnen/${related.id}`}
-              className="group rounded-xl border border-border/60 bg-card p-4 card-hover"
+              className={cn(
+                "group rounded-xl border border-border/50 bg-card p-4 card-hover",
+                `accent-line-top accent-line-${related.content_type}`
+              )}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-lg shrink-0",
+                    "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-transform duration-200 group-hover:scale-105",
                     config.bgColor
                   )}
                 >
@@ -57,11 +60,11 @@ export function RelatedMemories({ memoryId }: { memoryId: string }) {
                     {related.title}
                   </p>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground/50">
+                    <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground/45">
                       <Tag className="h-2.5 w-2.5" strokeWidth={1.5} />
                       {related.shared_tag_count} gemensamma
                     </span>
-                    <span className="text-[10px] text-muted-foreground/35">
+                    <span className="text-[10px] text-muted-foreground/30">
                       {relativeDate(related.created_at)}
                     </span>
                   </div>
