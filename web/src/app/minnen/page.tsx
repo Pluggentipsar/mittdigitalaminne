@@ -1,14 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import type { MemoryFilters } from "@/lib/types";
 import { useMemories } from "@/hooks/useMemories";
+import { useSpaces } from "@/hooks/useSpaces";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { MemoryGrid } from "@/components/memories/MemoryGrid";
 
-export default function MinnenPage() {
+function MinnenContent() {
+  const searchParams = useSearchParams();
+  const spaceId = searchParams.get("space");
+  const { spaces } = useSpaces();
   const [filters, setFilters] = useState<MemoryFilters>({});
+  const [activeSpaceName, setActiveSpaceName] = useState<string | null>(null);
   const { memories, count, isLoading, mutate } = useMemories(filters);
+
+  // Load space filters when ?space=ID changes
+  useEffect(() => {
+    if (spaceId && spaces.length > 0) {
+      const space = spaces.find((s) => s.id === spaceId);
+      if (space) {
+        setFilters(space.filters as MemoryFilters);
+        setActiveSpaceName(space.name);
+        return;
+      }
+    }
+    setActiveSpaceName(null);
+  }, [spaceId, spaces]);
 
   const handleToggleFavorite = async (id: string, current: boolean) => {
     await fetch(`/api/memories/${id}`, {
@@ -28,9 +47,13 @@ export default function MinnenPage() {
   return (
     <div className="space-y-6">
       <div className="animate-fade-in">
-        <h1 className="text-2xl font-extrabold tracking-tight">Minnen</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">
+          {activeSpaceName || "Minnen"}
+        </h1>
         <p className="text-[14px] text-muted-foreground mt-1">
-          {count > 0
+          {activeSpaceName
+            ? `${count} minnen i detta space`
+            : count > 0
             ? `${count} minnen`
             : "Bläddra och sök bland dina minnen"}
         </p>
@@ -61,5 +84,13 @@ export default function MinnenPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function MinnenPage() {
+  return (
+    <Suspense>
+      <MinnenContent />
+    </Suspense>
   );
 }

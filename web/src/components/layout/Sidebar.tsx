@@ -12,8 +12,11 @@ import {
   Sparkles,
   Menu,
   X,
+  Folder,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSpaces } from "@/hooks/useSpaces";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -25,6 +28,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { spaces, deleteSpace } = useSpaces();
 
   // Close drawer on route change
   useEffect(() => {
@@ -104,6 +108,63 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Spaces */}
+      {spaces.length > 0 && (
+        <>
+          <div className="mx-5 h-px bg-sidebar-foreground/8" />
+          <div className="px-4 py-3">
+            <p className="px-3 mb-1.5 text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
+              Spaces
+            </p>
+            <div className="space-y-0.5">
+              {spaces.map((space) => {
+                const spaceHref = `/minnen?space=${space.id}`;
+                const isActive = pathname === "/minnen" && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("space") === space.id;
+                return (
+                  <Link
+                    key={space.id}
+                    href={spaceHref}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-xl px-3 py-2 text-[12px] font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-sidebar-active text-purple-400"
+                        : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-sidebar-muted"
+                    )}
+                  >
+                    <Folder
+                      className={cn(
+                        "h-4 w-4 shrink-0 transition-colors",
+                        isActive
+                          ? "text-purple-400"
+                          : "text-sidebar-foreground/35 group-hover:text-sidebar-foreground/60"
+                      )}
+                    />
+                    <span className="flex-1 truncate">{space.name}</span>
+                    {typeof space.memory_count === "number" && (
+                      <span className="text-[10px] font-semibold text-sidebar-foreground/25 tabular-nums">
+                        {space.memory_count}
+                      </span>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (confirm(`Ta bort "${space.name}"?`)) {
+                          deleteSpace(space.id);
+                        }
+                      }}
+                      className="hidden group-hover:flex items-center justify-center w-5 h-5 rounded-md hover:bg-red-500/20 text-sidebar-foreground/25 hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Bottom section */}
       <div className="px-5 py-5">

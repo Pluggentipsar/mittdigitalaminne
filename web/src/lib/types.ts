@@ -60,6 +60,29 @@ export interface MemoryFilters {
   offset?: number;
 }
 
+export interface RelatedMemory {
+  id: string;
+  content_type: ContentType;
+  title: string;
+  summary: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  link_metadata: LinkMetadata | null;
+  created_at: string;
+  shared_tag_count: number;
+}
+
+export interface SmartSpace {
+  id: string;
+  name: string;
+  filters: Omit<MemoryFilters, "limit" | "offset">;
+  icon: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  memory_count?: number;
+}
+
 export interface MemoryStats {
   total: number;
   this_week: number;

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Image, Link2, FileText, Lightbulb, Youtube, Upload, X, Check, Loader2 } from "lucide-react";
+import { Image, Link2, FileText, Lightbulb, Youtube, Upload, X, Check, Loader2, Sparkles } from "lucide-react";
 import type { ContentType, Memory } from "@/lib/types";
 import { cn, contentTypeConfig } from "@/lib/utils";
+import { useTagSuggestions } from "@/hooks/useTagSuggestions";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const typeOptions: { type: ContentType; icon: any; desc: string }[] = [
   { type: "thought", icon: Lightbulb, desc: "En idé eller reflektion" },
@@ -52,6 +54,16 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
     channel_name?: string;
   } | null>(null);
   const lastUnfurledUrl = useRef("");
+  const { suggestions, loading: suggestionsLoading, fetchSuggestions } = useTagSuggestions();
+  const debouncedTitle = useDebounce(title, 1000);
+  const debouncedSummary = useDebounce(summary, 1000);
+
+  // Trigger tag suggestions when title/summary changes
+  useEffect(() => {
+    if (mode === "create" && (debouncedTitle || debouncedSummary)) {
+      fetchSuggestions(debouncedTitle, debouncedSummary, content);
+    }
+  }, [debouncedTitle, debouncedSummary, mode]);
 
   const unfurlUrl = useCallback(async (url: string) => {
     const trimmed = url.trim();
@@ -81,6 +93,14 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       // Auto-fill empty fields
       if (!title && data.title) setTitle(data.title);
       if (!summary && data.description) setSummary(data.description);
+      if (!content && data.article_text) setContent(data.article_text);
+
+      // Trigger tag suggestions with unfurled data
+      fetchSuggestions(
+        data.title || title,
+        data.description || summary,
+        data.article_text || content
+      );
 
       // Auto-switch content type if detected
       if (data.content_type_hint && contentType === "link") {
@@ -472,6 +492,55 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
             Lägg till
           </button>
         </div>
+
+        {/* Tag suggestions */}
+        {mode === "create" && suggestions && (
+          <div className="mt-3 space-y-2 animate-fade-in">
+            {suggestions.existing.filter((t) => !tags.includes(t)).length > 0 && (
+              <div>
+                <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider">
+                  Befintliga taggar
+                </span>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {suggestions.existing
+                    .filter((t) => !tags.includes(t))
+                    .map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setTags([...tags, tag])}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-primary/20 text-primary/70 hover:bg-primary/5 cursor-pointer transition-all"
+                      >
+                        <span>+</span> {tag}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+            {suggestions.suggested.filter((t) => !tags.includes(t)).length > 0 && (
+              <div>
+                <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider flex items-center gap-1">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  Föreslagna
+                </span>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {suggestions.suggested
+                    .filter((t) => !tags.includes(t))
+                    .map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setTags([...tags, tag])}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-dashed border-muted-foreground/20 text-muted-foreground/60 hover:bg-muted hover:text-foreground cursor-pointer transition-all"
+                      >
+                        <span>+</span> {tag}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Submit */}

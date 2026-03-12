@@ -1,10 +1,12 @@
 "use client";
 
-import { Search, Image, Link2, FileText, Lightbulb, Youtube, Star, SlidersHorizontal, Tag } from "lucide-react";
+import { Search, Image, Link2, FileText, Lightbulb, Youtube, Star, SlidersHorizontal, Tag, Bookmark } from "lucide-react";
 import type { ContentType, MemoryFilters } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useTags } from "@/hooks/useTags";
+import { useSpaces } from "@/hooks/useSpaces";
+import { SaveSpaceDialog } from "@/components/spaces/SaveSpaceDialog";
 import { useState, useEffect } from "react";
 
 interface FilterBarProps {
@@ -31,9 +33,25 @@ const sortOptions = [
 
 export function FilterBar({ filters, onFiltersChange }: FilterBarProps) {
   const [searchInput, setSearchInput] = useState(filters.query || "");
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const debouncedSearch = useDebounce(searchInput, 300);
   const { tags } = useTags();
+  const { createSpace } = useSpaces();
   const selectedTags = filters.tags || [];
+
+  // Check if any filters are active
+  const hasActiveFilters = !!(
+    filters.query ||
+    filters.content_type ||
+    filters.favorites_only ||
+    (filters.tags && filters.tags.length > 0) ||
+    filters.sort && filters.sort !== "newest"
+  );
+
+  // Sync search input when filters change externally (e.g. space load)
+  useEffect(() => {
+    setSearchInput(filters.query || "");
+  }, [filters.query]);
 
   useEffect(() => {
     if (debouncedSearch !== filters.query) {
@@ -111,6 +129,16 @@ export function FilterBar({ filters, onFiltersChange }: FilterBarProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <button
+              onClick={() => setSaveDialogOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-primary hover:bg-primary/10 border border-primary/20 transition-all"
+              title="Spara som Space"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              Spara
+            </button>
+          )}
           <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
           <select
             value={filters.sort || "newest"}
@@ -168,6 +196,12 @@ export function FilterBar({ filters, onFiltersChange }: FilterBarProps) {
           </div>
         </div>
       )}
+
+      <SaveSpaceDialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        onSave={(name) => createSpace(name, filters)}
+      />
     </div>
   );
 }

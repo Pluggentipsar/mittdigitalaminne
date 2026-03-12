@@ -12,12 +12,14 @@ import {
   Clock,
   Hash,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemory } from "@/hooks/useMemories";
 import { ContentTypeIcon } from "@/components/memories/ContentTypeIcon";
 import { MarkdownContent } from "@/components/ui/MarkdownContent";
 import { NotesThread } from "@/components/memories/NotesThread";
+import { RelatedMemories } from "@/components/memories/RelatedMemories";
 import { YouTubePreview } from "@/components/memories/previews/YouTubePreview";
 import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
@@ -154,6 +156,12 @@ export default function MemoryDetailPage({
             <Hash className="h-3.5 w-3.5" />
             {memory.source}
           </div>
+          {memory.original_content && memory.original_content.length > 200 && (
+            <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground font-medium">
+              <BookOpen className="h-3.5 w-3.5" />
+              {Math.max(1, Math.round(memory.original_content.split(/\s+/).length / 200))} min lästid
+            </div>
+          )}
         </div>
       </div>
 
@@ -233,6 +241,9 @@ export default function MemoryDetailPage({
 
       {/* Notes thread */}
       <NotesThread memoryId={id} />
+
+      {/* Related memories */}
+      <RelatedMemories memoryId={id} />
 
       {/* Tags */}
       {memory.tags && memory.tags.length > 0 && (

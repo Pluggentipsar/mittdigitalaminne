@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Readability } from "@mozilla/readability";
+import { parseHTML } from "linkedom";
 
 interface UnfurlResult {
   title: string | null;
@@ -9,6 +11,10 @@ interface UnfurlResult {
   content_type_hint: "youtube" | "linkedin" | "instagram" | null;
   video_id?: string;
   channel_name?: string;
+  article_text?: string;
+  author?: string;
+  word_count?: number;
+  read_time_minutes?: number;
 }
 
 function detectType(hostname: string): "youtube" | "linkedin" | "instagram" | null {
@@ -120,6 +126,33 @@ async function unfurlGeneric(url: string): Promise<UnfurlResult> {
       }
     };
 
+    // Extract article content with Readability
+    let article_text: string | undefined;
+    let author: string | undefined;
+    let word_count: number | undefined;
+    let read_time_minutes: number | undefined;
+
+    try {
+      const { document } = parseHTML(html);
+      const reader = new Readability(document as any);
+      const article = reader.parse();
+      if (article && article.textContent) {
+        const cleanText = article.textContent
+          .replace(/\n{3,}/g, "\n\n")
+          .trim()
+          .slice(0, 50000);
+        if (cleanText.length > 100) {
+          article_text = cleanText;
+          author = article.byline || undefined;
+          const words = cleanText.split(/\s+/).filter(Boolean).length;
+          word_count = words;
+          read_time_minutes = Math.max(1, Math.round(words / 200));
+        }
+      }
+    } catch {
+      // Readability extraction failed, continue without it
+    }
+
     return {
       title: title ? decodeHTMLEntities(title) : null,
       description: description ? decodeHTMLEntities(description) : null,
@@ -127,6 +160,10 @@ async function unfurlGeneric(url: string): Promise<UnfurlResult> {
       favicon: absUrl(favicon),
       domain,
       content_type_hint: typeHint,
+      article_text,
+      author,
+      word_count,
+      read_time_minutes,
     };
   } catch {
     return { title: null, description: null, image: null, favicon: null, domain, content_type_hint: typeHint };
