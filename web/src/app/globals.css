@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-destructive: var(--destructive);
+  --color-type-image: var(--type-image);
+  --color-type-link: var(--type-link);
+  --color-type-article: var(--type-article);
+  --color-type-thought: var(--type-thought);
+  --color-type-youtube: var(--type-youtube);
+  --color-type-linkedin: var(--type-linkedin);
+  --color-type-instagram: var(--type-instagram);
+  --font-sans: var(--font-jakarta);
+}
+
+:root {
+  /* Warm linen palette */
+  --background: #f7f5f0;
+  --foreground: #1a1814;
+  --muted: #efeae2;
+  --muted-foreground: #8c857a;
+  --border: #e3ddd3;
+  --card: #ffffff;
+  --card-foreground: #1a1814;
+
+  /* Deep violet — memory / brain theme */
+  --primary: #6d28d9;
+  --primary-foreground: #ffffff;
+
+  /* Accent — warm highlight */
+  --accent: #efeae2;
+  --accent-foreground: #1a1814;
+
+  /* Sidebar — dark warm charcoal */
+  --sidebar: #1a1814;
+  --sidebar-foreground: #f7f5f0;
+  --sidebar-muted: rgba(247, 245, 240, 0.06);
+  --sidebar-active: rgba(109, 40, 217, 0.12);
+
+  /* Semantic: content types */
+  --type-image: #e2590c;
+  --type-link: #0273b0;
+  --type-article: #058c5a;
+  --type-thought: #7c3aed;
+  --type-youtube: #cc181e;
+  --type-linkedin: #0a66c2;
+  --type-instagram: #e1306c;
+
+  /* Danger / delete */
+  --destructive: #dc2626;
+
+  /* Misc */
+  --radius: 12px;
+  --shadow-sm: 0 1px 2px rgba(26, 24, 20, 0.04);
+  --shadow-md: 0 4px 12px rgba(26, 24, 20, 0.06), 0 1px 3px rgba(26, 24, 20, 0.04);
+  --shadow-lg: 0 8px 24px rgba(26, 24, 20, 0.08), 0 2px 6px rgba(26, 24, 20, 0.04);
+}
+
+/* ─── Base ─────────────────────────────────────────────────────── */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(109, 40, 217, 0.15);
+  color: var(--foreground);
+}
+
+/* ─── Focus ring ───────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Custom scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* ─── Animations ───────────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* ─── Skeleton shimmer ─────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─── Content type badges ──────────────────────────────────────── */
+.badge-type-image { background: rgba(226, 89, 12, 0.08); color: #c04d0a; }
+.badge-type-link { background: rgba(2, 115, 176, 0.08); color: #026498; }
+.badge-type-article { background: rgba(5, 140, 90, 0.08); color: #047a4e; }
+.badge-type-thought { background: rgba(124, 58, 237, 0.08); color: #6d28d9; }
+.badge-type-youtube { background: rgba(204, 24, 30, 0.08); color: #b01419; }
+.badge-type-linkedin { background: rgba(10, 102, 194, 0.08); color: #0858a1; }
+.badge-type-instagram { background: rgba(225, 48, 108, 0.08); color: #c42a5e; }
+
+/* ─── Scrollbar-none utility ───────────────────────────────────── */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Recharts override ────────────────────────────────────────── */
+.recharts-text {
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+}
