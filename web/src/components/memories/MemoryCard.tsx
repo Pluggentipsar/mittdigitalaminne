@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Star, Trash2, ExternalLink, Instagram, Linkedin, Play } from "lucide-react";
+import { Star, Trash2, ExternalLink, Play } from "lucide-react";
 import type { Memory } from "@/lib/types";
 import { cn, relativeDate, contentTypeConfig } from "@/lib/utils";
 import { ContentTypeIcon } from "./ContentTypeIcon";
@@ -38,30 +38,6 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
           </div>
         )}
 
-        {/* Instagram — always platform placeholder (OG images blocked by Meta) */}
-        {memory.content_type === "instagram" && (
-          <div className="aspect-[2.2/1] overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#833AB4]/8 via-[#FD1D1D]/6 to-[#F77737]/8">
-            <div className="flex flex-col items-center gap-2.5">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center shadow-lg shadow-[#FD1D1D]/10">
-                <Instagram className="h-5.5 w-5.5 text-white" strokeWidth={1.5} />
-              </div>
-              <span className="text-[10px] font-semibold text-[#c13584]/50">Instagram</span>
-            </div>
-          </div>
-        )}
-
-        {/* LinkedIn — always platform placeholder (OG images blocked by LinkedIn) */}
-        {memory.content_type === "linkedin" && (
-          <div className="aspect-[2.2/1] overflow-hidden relative flex items-center justify-center bg-[#0a66c2]/[0.04]">
-            <div className="flex flex-col items-center gap-2.5">
-              <div className="w-11 h-11 rounded-xl bg-[#0a66c2] flex items-center justify-center shadow-lg shadow-[#0a66c2]/10">
-                <Linkedin className="h-5.5 w-5.5 text-white" strokeWidth={1.5} />
-              </div>
-              <span className="text-[10px] font-semibold text-[#0a66c2]/40">LinkedIn</span>
-            </div>
-          </div>
-        )}
-
         {/* YouTube thumbnail (OG images from YouTube are reliable) */}
         {memory.content_type === "youtube" && memory.link_metadata?.og_image && (
           <div className="aspect-video bg-muted overflow-hidden relative">
@@ -82,8 +58,8 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
           </div>
         )}
 
-        {/* Generic link/article OG image (generally reliable) */}
-        {!["image", "instagram", "linkedin", "youtube"].includes(memory.content_type) && memory.link_metadata?.og_image && !ogImageError && (
+        {/* OG image for links, articles, and social posts (with fallback) */}
+        {!["image", "youtube"].includes(memory.content_type) && memory.link_metadata?.og_image && !ogImageError && (
           <div className="aspect-[2.2/1] bg-muted overflow-hidden relative">
             <img
               src={memory.link_metadata.og_image}
