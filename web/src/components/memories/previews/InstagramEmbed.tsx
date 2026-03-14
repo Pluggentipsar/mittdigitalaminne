@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ExternalLink, Instagram, Loader2 } from "lucide-react";
 
 interface InstagramEmbedProps {
@@ -32,7 +32,33 @@ function getEmbedUrl(url: string): string | null {
 
 export function InstagramEmbed({ linkUrl, title }: InstagramEmbedProps) {
   const [loaded, setLoaded] = useState(false);
+  const [height, setHeight] = useState(580);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const embedUrl = getEmbedUrl(linkUrl);
+
+  // Listen for Instagram embed resize messages
+  const handleMessage = useCallback((event: MessageEvent) => {
+    if (typeof event.data === "string") {
+      try {
+        const data = JSON.parse(event.data);
+        // Instagram embeds send height via postMessage
+        if (data.type === "MEASURE" && data.details?.height) {
+          setHeight(Math.min(data.details.height, 1200));
+        }
+      } catch {
+        // Not JSON or not from Instagram — ignore
+      }
+    }
+    // Some embeds send { height: N } directly
+    if (event.data?.height && typeof event.data.height === "number") {
+      setHeight(Math.min(event.data.height, 1200));
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [handleMessage]);
 
   if (!embedUrl) {
     // Fallback: just a link
@@ -73,36 +99,37 @@ export function InstagramEmbed({ linkUrl, title }: InstagramEmbedProps) {
         </div>
       )}
 
-      {/* Embedded Instagram post */}
+      {/* Embedded Instagram post — dynamic height */}
       <iframe
+        ref={iframeRef}
         src={embedUrl}
-        className={`w-full border-0 transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0 h-0"}`}
+        className={`w-full border-0 transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0 absolute"}`}
         style={{
-          minHeight: loaded ? 480 : 0,
-          maxHeight: 680,
+          height: loaded ? height : 0,
           colorScheme: "light",
         }}
         onLoad={() => setLoaded(true)}
         allowTransparency
-        scrolling="no"
         title={title || "Instagram-inlägg"}
       />
 
       {/* Footer with link to original */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#833AB4]/5 via-[#FD1D1D]/5 to-[#F77737]/5 border-t border-border/30">
-        <div className="w-4 h-4 rounded bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center shrink-0">
-          <Instagram className="h-2.5 w-2.5 text-white" strokeWidth={2} />
+      {loaded && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#833AB4]/5 via-[#FD1D1D]/5 to-[#F77737]/5 border-t border-border/30">
+          <div className="w-4 h-4 rounded bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center shrink-0">
+            <Instagram className="h-2.5 w-2.5 text-white" strokeWidth={2} />
+          </div>
+          <a
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] font-medium text-muted-foreground/50 hover:text-foreground transition-colors"
+          >
+            Visa på Instagram
+          </a>
+          <ExternalLink className="h-3 w-3 text-muted-foreground/30 ml-auto" />
         </div>
-        <a
-          href={linkUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[11px] font-medium text-muted-foreground/50 hover:text-foreground transition-colors"
-        >
-          Visa på Instagram
-        </a>
-        <ExternalLink className="h-3 w-3 text-muted-foreground/30 ml-auto" />
-      </div>
+      )}
     </div>
   );
 }

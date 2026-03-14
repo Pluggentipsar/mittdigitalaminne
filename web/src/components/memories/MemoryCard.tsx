@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Star, Trash2, ExternalLink, Instagram, Linkedin, Play } from "lucide-react";
 import type { Memory } from "@/lib/types";
@@ -14,6 +15,7 @@ interface MemoryCardProps {
 
 export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardProps) {
   const config = contentTypeConfig[memory.content_type];
+  const [ogImageError, setOgImageError] = useState(false);
 
   return (
     <div className="group relative animate-fade-in">
@@ -37,7 +39,7 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
         )}
 
         {/* Link OG image / YouTube thumbnail / Social preview */}
-        {memory.content_type !== "image" && memory.link_metadata?.og_image && (
+        {memory.content_type !== "image" && memory.link_metadata?.og_image && !ogImageError && (
           <div className={cn(
             "bg-muted overflow-hidden relative",
             memory.content_type === "youtube" ? "aspect-video" : "aspect-[2.2/1]"
@@ -46,6 +48,7 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
               src={memory.link_metadata.og_image}
               alt=""
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              onError={() => setOgImageError(true)}
             />
 
             {/* YouTube play button overlay */}
@@ -83,6 +86,44 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
 
             {/* Subtle gradient overlay on hover */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          </div>
+        )}
+
+        {/* Fallback placeholder when OG image fails (Instagram, LinkedIn, etc.) */}
+        {memory.content_type !== "image" && ogImageError && (
+          <div className="aspect-[2.2/1] bg-muted overflow-hidden relative flex items-center justify-center">
+            {memory.content_type === "instagram" && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white" strokeWidth={1.5} />
+                </div>
+                <span className="text-[10px] font-semibold text-muted-foreground/40">Instagram</span>
+              </div>
+            )}
+            {memory.content_type === "linkedin" && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-[#0a66c2] flex items-center justify-center">
+                  <Linkedin className="h-5 w-5 text-white" strokeWidth={1.5} />
+                </div>
+                <span className="text-[10px] font-semibold text-muted-foreground/40">LinkedIn</span>
+              </div>
+            )}
+            {memory.content_type === "youtube" && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-8 bg-[#cc181e] rounded-lg flex items-center justify-center">
+                  <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
+                </div>
+                <span className="text-[10px] font-semibold text-muted-foreground/40">YouTube</span>
+              </div>
+            )}
+            {!["instagram", "linkedin", "youtube"].includes(memory.content_type) && (
+              <div className="flex flex-col items-center gap-2">
+                <ExternalLink className="h-5 w-5 text-muted-foreground/30" />
+                <span className="text-[10px] font-semibold text-muted-foreground/40">
+                  {memory.link_metadata?.domain || "Länk"}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
