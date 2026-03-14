@@ -38,92 +38,60 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
           </div>
         )}
 
-        {/* Link OG image / YouTube thumbnail / Social preview */}
-        {memory.content_type !== "image" && memory.link_metadata?.og_image && !ogImageError && (
-          <div className={cn(
-            "bg-muted overflow-hidden relative",
-            memory.content_type === "youtube" ? "aspect-video" : "aspect-[2.2/1]"
-          )}>
+        {/* Instagram — always platform placeholder (OG images blocked by Meta) */}
+        {memory.content_type === "instagram" && (
+          <div className="aspect-[2.2/1] overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#833AB4]/8 via-[#FD1D1D]/6 to-[#F77737]/8">
+            <div className="flex flex-col items-center gap-2.5">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center shadow-lg shadow-[#FD1D1D]/10">
+                <Instagram className="h-5.5 w-5.5 text-white" strokeWidth={1.5} />
+              </div>
+              <span className="text-[10px] font-semibold text-[#c13584]/50">Instagram</span>
+            </div>
+          </div>
+        )}
+
+        {/* LinkedIn — always platform placeholder (OG images blocked by LinkedIn) */}
+        {memory.content_type === "linkedin" && (
+          <div className="aspect-[2.2/1] overflow-hidden relative flex items-center justify-center bg-[#0a66c2]/[0.04]">
+            <div className="flex flex-col items-center gap-2.5">
+              <div className="w-11 h-11 rounded-xl bg-[#0a66c2] flex items-center justify-center shadow-lg shadow-[#0a66c2]/10">
+                <Linkedin className="h-5.5 w-5.5 text-white" strokeWidth={1.5} />
+              </div>
+              <span className="text-[10px] font-semibold text-[#0a66c2]/40">LinkedIn</span>
+            </div>
+          </div>
+        )}
+
+        {/* YouTube thumbnail (OG images from YouTube are reliable) */}
+        {memory.content_type === "youtube" && memory.link_metadata?.og_image && (
+          <div className="aspect-video bg-muted overflow-hidden relative">
             <img
               src={memory.link_metadata.og_image}
               alt=""
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
               onError={() => setOgImageError(true)}
             />
-
-            {/* YouTube play button overlay */}
-            {memory.content_type === "youtube" && (
+            {!ogImageError && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-12 h-8 bg-[#cc181e] rounded-lg flex items-center justify-center group-hover:bg-[#ff0000] transition-colors shadow-lg">
                   <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
                 </div>
               </div>
             )}
-
-            {/* Instagram gradient badge */}
-            {memory.content_type === "instagram" && (
-              <div className="absolute bottom-2.5 left-2.5">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm">
-                  <div className="w-4 h-4 rounded bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
-                    <Instagram className="h-2.5 w-2.5 text-white" strokeWidth={2} />
-                  </div>
-                  <span className="text-[10px] font-semibold text-white/90">Instagram</span>
-                </div>
-              </div>
-            )}
-
-            {/* LinkedIn badge */}
-            {memory.content_type === "linkedin" && (
-              <div className="absolute bottom-2.5 left-2.5">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm">
-                  <div className="w-4 h-4 rounded bg-[#0a66c2] flex items-center justify-center">
-                    <Linkedin className="h-2.5 w-2.5 text-white" strokeWidth={2} />
-                  </div>
-                  <span className="text-[10px] font-semibold text-white/90">LinkedIn</span>
-                </div>
-              </div>
-            )}
-
-            {/* Subtle gradient overlay on hover */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>
         )}
 
-        {/* Fallback placeholder when OG image fails (Instagram, LinkedIn, etc.) */}
-        {memory.content_type !== "image" && ogImageError && (
-          <div className="aspect-[2.2/1] bg-muted overflow-hidden relative flex items-center justify-center">
-            {memory.content_type === "instagram" && (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
-                  <Instagram className="h-5 w-5 text-white" strokeWidth={1.5} />
-                </div>
-                <span className="text-[10px] font-semibold text-muted-foreground/40">Instagram</span>
-              </div>
-            )}
-            {memory.content_type === "linkedin" && (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-[#0a66c2] flex items-center justify-center">
-                  <Linkedin className="h-5 w-5 text-white" strokeWidth={1.5} />
-                </div>
-                <span className="text-[10px] font-semibold text-muted-foreground/40">LinkedIn</span>
-              </div>
-            )}
-            {memory.content_type === "youtube" && (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-8 bg-[#cc181e] rounded-lg flex items-center justify-center">
-                  <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
-                </div>
-                <span className="text-[10px] font-semibold text-muted-foreground/40">YouTube</span>
-              </div>
-            )}
-            {!["instagram", "linkedin", "youtube"].includes(memory.content_type) && (
-              <div className="flex flex-col items-center gap-2">
-                <ExternalLink className="h-5 w-5 text-muted-foreground/30" />
-                <span className="text-[10px] font-semibold text-muted-foreground/40">
-                  {memory.link_metadata?.domain || "Länk"}
-                </span>
-              </div>
-            )}
+        {/* Generic link/article OG image (generally reliable) */}
+        {!["image", "instagram", "linkedin", "youtube"].includes(memory.content_type) && memory.link_metadata?.og_image && !ogImageError && (
+          <div className="aspect-[2.2/1] bg-muted overflow-hidden relative">
+            <img
+              src={memory.link_metadata.og_image}
+              alt=""
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              onError={() => setOgImageError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>
         )}
 
