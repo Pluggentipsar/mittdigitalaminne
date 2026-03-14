@@ -59,6 +59,7 @@ export interface MemoryFilters {
   date_to?: string;
   favorites_only?: boolean;
   is_inbox?: boolean;
+  project_id?: string;
   sort?: "newest" | "oldest" | "title";
   limit?: number;
   offset?: number;

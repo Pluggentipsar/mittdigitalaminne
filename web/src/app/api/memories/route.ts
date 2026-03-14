@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   const date_to = searchParams.get("date_to");
   const favorites_only = searchParams.get("favorites_only") === "true";
   const is_inbox = searchParams.get("is_inbox");
+  const project_id = searchParams.get("project_id");
   const sort = searchParams.get("sort") || "newest";
   const limit = parseInt(searchParams.get("limit") || "50");
   const offset = parseInt(searchParams.get("offset") || "0");
@@ -35,8 +36,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const results = data || [];
-  const totalCount = results.length > 0 ? results[0]?.total_count : 0;
+  let results = data || [];
+
+  // Filter by project membership if project_id is specified
+  if (project_id) {
+    const { data: projectMemories } = await supabase
+      .from("memory_projects")
+      .select("memory_id")
+      .eq("project_id", project_id);
+    const projectMemoryIds = new Set(
+      (projectMemories || []).map((pm: any) => pm.memory_id)
+    );
+    results = results.filter((m: any) => projectMemoryIds.has(m.id));
+  }
+
+  const totalCount = project_id
+    ? results.length
+    : results.length > 0
+    ? results[0]?.total_count
+    : 0;
 
   // Transform to match expected frontend shape
   const transformed = results.map((m: any) => {

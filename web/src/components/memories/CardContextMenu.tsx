@@ -1,0 +1,239 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import {
+  Star,
+  FolderPlus,
+  FileDown,
+  ExternalLink,
+  Trash2,
+  ChevronRight,
+  Check,
+  Loader2,
+} from "lucide-react";
+import type { Memory, Project } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+interface CardContextMenuProps {
+  memory: Memory;
+  x: number;
+  y: number;
+  onClose: () => void;
+  onToggleFavorite: (id: string, current: boolean) => void;
+  onDelete: (id: string) => void;
+  onAddToProject: (memoryId: string, projectId: string) => Promise<void>;
+  projects: Project[];
+}
+
+export function CardContextMenu({
+  memory,
+  x,
+  y,
+  onClose,
+  onToggleFavorite,
+  onDelete,
+  onAddToProject,
+  projects,
+}: CardContextMenuProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [showProjects, setShowProjects] = useState(false);
+  const [addingToProject, setAddingToProject] = useState<string | null>(null);
+  const [addedToProject, setAddedToProject] = useState<Set<string>>(new Set());
+
+  // Position the menu within viewport
+  const [position, setPosition] = useState({ x, y });
+
+  useEffect(() => {
+    if (menuRef.current) {
+      const rect = menuRef.current.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let nx = x;
+      let ny = y;
+      if (x + rect.width > vw - 8) nx = vw - rect.width - 8;
+      if (y + rect.height > vh - 8) ny = vh - rect.height - 8;
+      if (nx < 8) nx = 8;
+      if (ny < 8) ny = 8;
+      setPosition({ x: nx, y: ny });
+    }
+  }, [x, y]);
+
+  // Close on click outside or Escape
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  const handleExportText = () => {
+    const parts: string[] = [];
+    parts.push(memory.title);
+    parts.push("");
+    if (memory.link_url) parts.push(`Länk: ${memory.link_url}`);
+    if (memory.summary) {
+      parts.push("--- Sammanfattning ---");
+      parts.push(memory.summary);
+    }
+    if (memory.original_content) {
+      parts.push("");
+      parts.push("--- Innehåll ---");
+      parts.push(memory.original_content);
+    }
+    parts.push("");
+    parts.push(`Sparad: ${new Date(memory.created_at).toLocaleString("sv-SE")}`);
+    if (memory.tags?.length) {
+      parts.push(`Taggar: ${memory.tags.map((t) => t.name).join(", ")}`);
+    }
+
+    const blob = new Blob([parts.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${memory.title.slice(0, 50).replace(/[^a-zA-ZåäöÅÄÖ0-9 -]/g, "")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onClose();
+  };
+
+  const handleAddToProject = async (projectId: string) => {
+    setAddingToProject(projectId);
+    try {
+      await onAddToProject(memory.id, projectId);
+      setAddedToProject((prev) => new Set(prev).add(projectId));
+    } catch {
+      // ignore
+    }
+    setAddingToProject(null);
+  };
+
+  const activeProjects = projects.filter((p) => p.status === "active");
+
+  return (
+    <div
+      ref={menuRef}
+      className="fixed z-[100] min-w-[200px] bg-card rounded-xl border border-border/60 shadow-lg py-1.5 animate-scale-in"
+      style={{
+        left: position.x,
+        top: position.y,
+        transformOrigin: "top left",
+      }}
+    >
+      {/* Favorit */}
+      <button
+        onClick={() => {
+          onToggleFavorite(memory.id, memory.is_favorite);
+          onClose();
+        }}
+        className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+      >
+        <Star
+          className={cn(
+            "h-4 w-4",
+            memory.is_favorite
+              ? "fill-amber-400 text-amber-400"
+              : "text-muted-foreground/50"
+          )}
+          strokeWidth={1.5}
+        />
+        {memory.is_favorite ? "Ta bort favorit" : "Markera som favorit"}
+      </button>
+
+      {/* Lägg till i projekt */}
+      <div
+        className="relative"
+        onMouseEnter={() => setShowProjects(true)}
+        onMouseLeave={() => setShowProjects(false)}
+      >
+        <button className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors">
+          <FolderPlus className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+          Lägg till i projekt
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto" />
+        </button>
+
+        {/* Project submenu */}
+        {showProjects && activeProjects.length > 0 && (
+          <div className="absolute left-full top-0 ml-1 min-w-[180px] bg-card rounded-xl border border-border/60 shadow-lg py-1.5 animate-fade">
+            {activeProjects.map((project) => (
+              <button
+                key={project.id}
+                onClick={() => handleAddToProject(project.id)}
+                disabled={addingToProject === project.id}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-left text-[12px] font-medium hover:bg-accent/70 transition-colors disabled:opacity-50"
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: project.color }}
+                />
+                <span className="flex-1 truncate">{project.name}</span>
+                {addingToProject === project.id && (
+                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/50" />
+                )}
+                {addedToProject.has(project.id) && addingToProject !== project.id && (
+                  <Check className="h-3 w-3 text-emerald-500" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showProjects && activeProjects.length === 0 && (
+          <div className="absolute left-full top-0 ml-1 min-w-[160px] bg-card rounded-xl border border-border/60 shadow-lg py-3 px-3.5 animate-fade">
+            <p className="text-[11px] text-muted-foreground/50">Inga projekt ännu</p>
+          </div>
+        )}
+      </div>
+
+      <div className="h-px bg-border/40 mx-2 my-1" />
+
+      {/* Exportera som text */}
+      {(memory.original_content || memory.summary) && (
+        <button
+          onClick={handleExportText}
+          className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+        >
+          <FileDown className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+          Exportera som text
+        </button>
+      )}
+
+      {/* Öppna original */}
+      {memory.link_url && (
+        <a
+          href={memory.link_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onClose}
+          className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+        >
+          <ExternalLink className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+          Öppna original
+        </a>
+      )}
+
+      <div className="h-px bg-border/40 mx-2 my-1" />
+
+      {/* Ta bort */}
+      <button
+        onClick={() => {
+          onDelete(memory.id);
+          onClose();
+        }}
+        className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium text-destructive hover:bg-red-50 transition-colors"
+      >
+        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+        Ta bort
+      </button>
+    </div>
+  );
+}

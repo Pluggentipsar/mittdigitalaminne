@@ -14,6 +14,7 @@ function buildQueryString(filters: MemoryFilters): string {
   if (filters.date_to) params.set("date_to", filters.date_to);
   if (filters.favorites_only) params.set("favorites_only", "true");
   if (filters.is_inbox !== undefined) params.set("is_inbox", String(filters.is_inbox));
+  if (filters.project_id) params.set("project_id", filters.project_id);
   if (filters.sort) params.set("sort", filters.sort);
   if (filters.limit) params.set("limit", String(filters.limit));
   if (filters.offset) params.set("offset", String(filters.offset));

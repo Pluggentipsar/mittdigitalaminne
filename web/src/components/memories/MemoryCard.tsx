@@ -11,14 +11,15 @@ interface MemoryCardProps {
   memory: Memory;
   onToggleFavorite?: (id: string, current: boolean) => void;
   onDelete?: (id: string) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
-export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardProps) {
+export function MemoryCard({ memory, onToggleFavorite, onDelete, onContextMenu }: MemoryCardProps) {
   const config = contentTypeConfig[memory.content_type];
   const [ogImageError, setOgImageError] = useState(false);
 
   return (
-    <div className="group relative animate-fade-in">
+    <div className="group relative animate-fade-in" onContextMenu={onContextMenu}>
       <Link
         href={`/minnen/${memory.id}`}
         className={cn(

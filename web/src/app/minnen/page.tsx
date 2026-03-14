@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { MemoryFilters } from "@/lib/types";
 import { useMemories } from "@/hooks/useMemories";
 import { useSpaces } from "@/hooks/useSpaces";
+import { useProjects } from "@/hooks/useProjects";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { MemoryGrid } from "@/components/memories/MemoryGrid";
 
@@ -12,9 +13,18 @@ function MinnenContent() {
   const searchParams = useSearchParams();
   const spaceId = searchParams.get("space");
   const { spaces } = useSpaces();
+  const { projects } = useProjects();
   const [filters, setFilters] = useState<MemoryFilters>({ is_inbox: false });
   const [activeSpaceName, setActiveSpaceName] = useState<string | null>(null);
   const { memories, count, isLoading, mutate } = useMemories(filters);
+
+  const handleAddToProject = async (memoryId: string, projectId: string) => {
+    await fetch(`/api/projects/${projectId}/memories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ memory_id: memoryId }),
+    });
+  };
 
   useEffect(() => {
     if (spaceId && spaces.length > 0) {
@@ -65,7 +75,7 @@ function MinnenContent() {
         </div>
       </div>
 
-      <FilterBar filters={filters} onFiltersChange={setFilters} />
+      <FilterBar filters={filters} onFiltersChange={setFilters} projects={projects} />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -88,8 +98,10 @@ function MinnenContent() {
       ) : (
         <MemoryGrid
           memories={memories}
+          projects={projects}
           onToggleFavorite={handleToggleFavorite}
           onDelete={handleDelete}
+          onAddToProject={handleAddToProject}
         />
       )}
     </div>

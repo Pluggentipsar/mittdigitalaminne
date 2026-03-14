@@ -1,7 +1,7 @@
 "use client";
 
-import { Search, Image, Link2, FileText, Lightbulb, Youtube, Star, SlidersHorizontal, Tag, Bookmark } from "lucide-react";
-import type { ContentType, MemoryFilters } from "@/lib/types";
+import { Search, Image, Link2, FileText, Lightbulb, Youtube, Star, SlidersHorizontal, Tag, Bookmark, FolderOpen } from "lucide-react";
+import type { ContentType, MemoryFilters, Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useTags } from "@/hooks/useTags";
@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 interface FilterBarProps {
   filters: MemoryFilters;
   onFiltersChange: (filters: MemoryFilters) => void;
+  projects?: Project[];
 }
 
 const typeButtons: { type: ContentType | null; label: string; icon: any }[] = [
@@ -31,7 +32,7 @@ const sortOptions = [
   { value: "title", label: "Titel A-Ö" },
 ];
 
-export function FilterBar({ filters, onFiltersChange }: FilterBarProps) {
+export function FilterBar({ filters, onFiltersChange, projects = [] }: FilterBarProps) {
   const [searchInput, setSearchInput] = useState(filters.query || "");
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -43,9 +44,12 @@ export function FilterBar({ filters, onFiltersChange }: FilterBarProps) {
     filters.query ||
     filters.content_type ||
     filters.favorites_only ||
+    filters.project_id ||
     (filters.tags && filters.tags.length > 0) ||
     filters.sort && filters.sort !== "newest"
   );
+
+  const activeProjects = projects.filter((p) => p.status === "active");
 
   useEffect(() => {
     setSearchInput(filters.query || "");
@@ -124,6 +128,37 @@ export function FilterBar({ filters, onFiltersChange }: FilterBarProps) {
             />
             Favoriter
           </button>
+
+          {activeProjects.length > 0 && (
+            <>
+              <div className="w-px h-4 bg-border/60 mx-1" />
+              <div className="relative">
+                <select
+                  value={filters.project_id || ""}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...filters,
+                      project_id: e.target.value || undefined,
+                    })
+                  }
+                  className={cn(
+                    "flex items-center gap-1.5 pl-7 pr-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 appearance-none cursor-pointer bg-transparent border-0 focus:outline-none focus:ring-0",
+                    filters.project_id
+                      ? "bg-primary/8 text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <option value="">Projekt</option>
+                  {activeProjects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <FolderOpen className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 pointer-events-none text-muted-foreground/50" strokeWidth={1.5} />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

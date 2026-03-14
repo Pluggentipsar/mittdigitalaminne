@@ -1,17 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import { Inbox } from "lucide-react";
 import Link from "next/link";
-import type { Memory } from "@/lib/types";
+import type { Memory, Project } from "@/lib/types";
 import { MemoryCard } from "./MemoryCard";
+import { CardContextMenu } from "./CardContextMenu";
 
 interface MemoryGridProps {
   memories: Memory[];
+  projects?: Project[];
   onToggleFavorite?: (id: string, current: boolean) => void;
   onDelete?: (id: string) => void;
+  onAddToProject?: (memoryId: string, projectId: string) => Promise<void>;
 }
 
-export function MemoryGrid({ memories, onToggleFavorite, onDelete }: MemoryGridProps) {
+interface ContextMenuState {
+  memory: Memory;
+  x: number;
+  y: number;
+}
+
+export function MemoryGrid({
+  memories,
+  projects = [],
+  onToggleFavorite,
+  onDelete,
+  onAddToProject,
+}: MemoryGridProps) {
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent, memory: Memory) => {
+    e.preventDefault();
+    setContextMenu({ memory, x: e.clientX, y: e.clientY });
+  };
+
   if (memories.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
@@ -35,15 +58,35 @@ export function MemoryGrid({ memories, onToggleFavorite, onDelete }: MemoryGridP
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-      {memories.map((memory) => (
-        <MemoryCard
-          key={memory.id}
-          memory={memory}
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {memories.map((memory) => (
+          <MemoryCard
+            key={memory.id}
+            memory={memory}
+            onToggleFavorite={onToggleFavorite}
+            onDelete={onDelete}
+            onContextMenu={(e) => handleContextMenu(e, memory)}
+          />
+        ))}
+      </div>
+
+      {contextMenu && onToggleFavorite && onDelete && onAddToProject && (
+        <CardContextMenu
+          memory={contextMenu.memory}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
           onToggleFavorite={onToggleFavorite}
-          onDelete={onDelete}
+          onDelete={(id) => {
+            if (confirm("Vill du verkligen ta bort detta minne?")) {
+              onDelete(id);
+            }
+          }}
+          onAddToProject={onAddToProject}
+          projects={projects}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }
