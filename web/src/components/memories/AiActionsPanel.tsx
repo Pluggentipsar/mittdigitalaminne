@@ -95,26 +95,20 @@ export function AiActionsPanel({
     onClose();
   };
 
+  if (!open) return null;
+
   return (
     <>
       {/* Backdrop */}
       <div
-        className={cn(
-          "fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300",
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        )}
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 animate-fade-in"
         onClick={onClose}
       />
 
       {/* Panel */}
       <div
         ref={panelRef}
-        className={cn(
-          "fixed top-0 right-0 h-full w-full max-w-md bg-card border-l border-border/50 shadow-2xl z-50 transition-transform duration-300 ease-out flex flex-col",
-          open ? "translate-x-0" : "translate-x-full"
-        )}
+        className="fixed top-0 right-0 h-full w-full max-w-md bg-card border-l border-border/50 shadow-2xl z-50 flex flex-col animate-slide-in-right"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border/50">

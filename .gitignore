@@ -31,3 +31,5 @@ run-migration*.mjs
 
 # TypeScript
 *.tsbuildinfo
+
+.vercel

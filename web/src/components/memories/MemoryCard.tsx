@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Trash2, ExternalLink } from "lucide-react";
+import { Star, Trash2, ExternalLink, Instagram, Linkedin, Play } from "lucide-react";
 import type { Memory } from "@/lib/types";
 import { cn, relativeDate, contentTypeConfig } from "@/lib/utils";
 import { ContentTypeIcon } from "./ContentTypeIcon";
@@ -36,16 +36,53 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete }: MemoryCardPro
           </div>
         )}
 
-        {/* Link OG image */}
+        {/* Link OG image / YouTube thumbnail / Social preview */}
         {memory.content_type !== "image" && memory.link_metadata?.og_image && (
-          <div className="aspect-[2.2/1] bg-muted overflow-hidden relative">
+          <div className={cn(
+            "bg-muted overflow-hidden relative",
+            memory.content_type === "youtube" ? "aspect-video" : "aspect-[2.2/1]"
+          )}>
             <img
               src={memory.link_metadata.og_image}
               alt=""
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             />
+
+            {/* YouTube play button overlay */}
+            {memory.content_type === "youtube" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-8 bg-[#cc181e] rounded-lg flex items-center justify-center group-hover:bg-[#ff0000] transition-colors shadow-lg">
+                  <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
+                </div>
+              </div>
+            )}
+
+            {/* Instagram gradient badge */}
+            {memory.content_type === "instagram" && (
+              <div className="absolute bottom-2.5 left-2.5">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm">
+                  <div className="w-4 h-4 rounded bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
+                    <Instagram className="h-2.5 w-2.5 text-white" strokeWidth={2} />
+                  </div>
+                  <span className="text-[10px] font-semibold text-white/90">Instagram</span>
+                </div>
+              </div>
+            )}
+
+            {/* LinkedIn badge */}
+            {memory.content_type === "linkedin" && (
+              <div className="absolute bottom-2.5 left-2.5">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm">
+                  <div className="w-4 h-4 rounded bg-[#0a66c2] flex items-center justify-center">
+                    <Linkedin className="h-2.5 w-2.5 text-white" strokeWidth={2} />
+                  </div>
+                  <span className="text-[10px] font-semibold text-white/90">LinkedIn</span>
+                </div>
+              </div>
+            )}
+
             {/* Subtle gradient overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>
         )}
 

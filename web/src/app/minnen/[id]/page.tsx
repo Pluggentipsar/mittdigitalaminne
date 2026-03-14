@@ -28,6 +28,7 @@ import { AddToProjectDialog } from "@/components/projects/AddToProjectDialog";
 import { YouTubePreview } from "@/components/memories/previews/YouTubePreview";
 import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
+import { InstagramEmbed } from "@/components/memories/previews/InstagramEmbed";
 import { contentTypeConfig, cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -230,9 +231,14 @@ export default function MemoryDetailPage({
         <YouTubePreview linkUrl={memory.link_url} metadata={memory.link_metadata} embed />
       )}
 
-      {/* LinkedIn / Instagram preview */}
-      {(memory.content_type === "linkedin" || memory.content_type === "instagram") && memory.link_url && (
-        <SocialPreview type={memory.content_type} linkUrl={memory.link_url} metadata={memory.link_metadata} />
+      {/* Instagram embed */}
+      {memory.content_type === "instagram" && memory.link_url && (
+        <InstagramEmbed linkUrl={memory.link_url} title={memory.title} />
+      )}
+
+      {/* LinkedIn preview */}
+      {memory.content_type === "linkedin" && memory.link_url && (
+        <SocialPreview type="linkedin" linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
 
       {/* Link preview */}
