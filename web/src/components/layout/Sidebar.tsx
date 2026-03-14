@@ -8,6 +8,7 @@ import {
   Library,
   PlusCircle,
   Tags,
+  FolderKanban,
   Menu,
   X,
   Folder,
@@ -15,23 +16,31 @@ import {
   Zap,
   ChevronsLeft,
   ChevronsRight,
+  Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useSidebar } from "@/contexts/SidebarContext";
+import useSWR from "swr";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/inkorg", label: "Inkorg", icon: Inbox, hasBadge: true },
   { href: "/minnen", label: "Minnen", icon: Library },
   { href: "/lagg-till", label: "Lägg till", icon: PlusCircle },
   { href: "/taggar", label: "Taggar", icon: Tags },
+  { href: "/projekt", label: "Projekt", icon: FolderKanban },
 ];
+
+const statsFetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { spaces, deleteSpace } = useSpaces();
   const { collapsed, toggle } = useSidebar();
+  const { data: statsData } = useSWR<{ data: { inbox_count: number } }>("/api/statistics", statsFetcher, { refreshInterval: 30000 });
+  const inboxCount = statsData?.data?.inbox_count || 0;
 
   useEffect(() => {
     setMobileOpen(false);
@@ -99,7 +108,13 @@ export function Sidebar() {
                 strokeWidth={isActive ? 2 : 1.5}
               />
               <span className="relative">{item.label}</span>
-              {isActive && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
+              {item.hasBadge && inboxCount > 0 && (
+                <span className="relative ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-bold tabular-nums px-1">
+                  {inboxCount}
+                </span>
+              )}
+              {isActive && !item.hasBadge && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
+              {isActive && item.hasBadge && inboxCount === 0 && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
             </Link>
           );
         })}
@@ -195,17 +210,29 @@ export function Sidebar() {
               )}
             >
               {isActive && <div className="absolute inset-0 rounded-xl bg-amber-500/8 blur-[4px]" />}
-              <item.icon
-                className={cn(
-                  "relative h-[17px] w-[17px] transition-colors shrink-0",
-                  isActive ? "text-amber-400" : "text-sidebar-foreground/25 group-hover:text-sidebar-foreground/50"
+              <div className="relative">
+                <item.icon
+                  className={cn(
+                    "h-[17px] w-[17px] transition-colors shrink-0",
+                    isActive ? "text-amber-400" : "text-sidebar-foreground/25 group-hover:text-sidebar-foreground/50"
+                  )}
+                  strokeWidth={isActive ? 2 : 1.5}
+                />
+                {collapsed && item.hasBadge && inboxCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-amber-500 text-[8px] font-bold text-white px-0.5">
+                    {inboxCount > 9 ? "9+" : inboxCount}
+                  </span>
                 )}
-                strokeWidth={isActive ? 2 : 1.5}
-              />
+              </div>
               {!collapsed && (
                 <>
                   <span className="relative">{item.label}</span>
-                  {isActive && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
+                  {item.hasBadge && inboxCount > 0 && (
+                    <span className="relative ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-bold tabular-nums px-1">
+                      {inboxCount}
+                    </span>
+                  )}
+                  {isActive && !(item.hasBadge && inboxCount > 0) && <div className="relative ml-auto w-1 h-4 rounded-full bg-amber-400/60" />}
                 </>
               )}
             </Link>

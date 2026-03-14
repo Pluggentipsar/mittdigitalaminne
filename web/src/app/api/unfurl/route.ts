@@ -12,6 +12,7 @@ interface UnfurlResult {
   video_id?: string;
   channel_name?: string;
   article_text?: string;
+  snapshot_html?: string;
   author?: string;
   word_count?: number;
   read_time_minutes?: number;
@@ -128,6 +129,7 @@ async function unfurlGeneric(url: string): Promise<UnfurlResult> {
 
     // Extract article content with Readability
     let article_text: string | undefined;
+    let snapshot_html: string | undefined;
     let author: string | undefined;
     let word_count: number | undefined;
     let read_time_minutes: number | undefined;
@@ -148,9 +150,23 @@ async function unfurlGeneric(url: string): Promise<UnfurlResult> {
           word_count = words;
           read_time_minutes = Math.max(1, Math.round(words / 200));
         }
+        // Capture cleaned article HTML for snapshot (max 500KB)
+        if (article.content) {
+          snapshot_html = article.content.slice(0, 500000);
+        }
       }
     } catch {
       // Readability extraction failed, continue without it
+    }
+
+    // Fallback: capture raw HTML body if Readability didn't extract content
+    if (!snapshot_html && html.length > 100) {
+      // Strip scripts and styles, keep first 500KB
+      const stripped = html
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[\s\S]*?<\/style>/gi, "")
+        .slice(0, 500000);
+      snapshot_html = stripped;
     }
 
     return {
@@ -161,6 +177,7 @@ async function unfurlGeneric(url: string): Promise<UnfurlResult> {
       domain,
       content_type_hint: typeHint,
       article_text,
+      snapshot_html,
       author,
       word_count,
       read_time_minutes,

@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   const date_from = searchParams.get("date_from");
   const date_to = searchParams.get("date_to");
   const favorites_only = searchParams.get("favorites_only") === "true";
+  const is_inbox = searchParams.get("is_inbox");
   const sort = searchParams.get("sort") || "newest";
   const limit = parseInt(searchParams.get("limit") || "50");
   const offset = parseInt(searchParams.get("offset") || "0");
@@ -24,6 +25,7 @@ export async function GET(req: NextRequest) {
     filter_date_from: date_from || null,
     filter_date_to: date_to || null,
     filter_favorites_only: favorites_only,
+    filter_inbox: is_inbox !== null ? is_inbox === "true" : null,
     sort_by: sortBy,
     result_limit: limit,
     result_offset: offset,
@@ -54,6 +56,7 @@ export async function GET(req: NextRequest) {
       link_metadata: m.link_metadata,
       source: m.source,
       is_favorite: m.is_favorite,
+      is_inbox: m.is_inbox,
       created_at: m.created_at,
       updated_at: m.updated_at,
       tags: tagIds.map((id: string, i: number) => ({

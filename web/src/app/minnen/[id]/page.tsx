@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -13,6 +13,8 @@ import {
   Hash,
   Sparkles,
   BookOpen,
+  Wand2,
+  FolderPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemory } from "@/hooks/useMemories";
@@ -20,12 +22,16 @@ import { ContentTypeIcon } from "@/components/memories/ContentTypeIcon";
 import { MarkdownContent } from "@/components/ui/MarkdownContent";
 import { NotesThread } from "@/components/memories/NotesThread";
 import { RelatedMemories } from "@/components/memories/RelatedMemories";
+import { AiActionsPanel } from "@/components/memories/AiActionsPanel";
+import { SnapshotViewer } from "@/components/memories/SnapshotViewer";
+import { AddToProjectDialog } from "@/components/projects/AddToProjectDialog";
 import { YouTubePreview } from "@/components/memories/previews/YouTubePreview";
 import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
 import { contentTypeConfig, cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
+import type { Project } from "@/lib/types";
 
 export default function MemoryDetailPage({
   params,
@@ -35,6 +41,39 @@ export default function MemoryDetailPage({
   const { id } = use(params);
   const router = useRouter();
   const { memory, isLoading, mutate } = useMemory(id);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [memoryProjects, setMemoryProjects] = useState<Project[]>([]);
+
+  const fetchMemoryProjects = useCallback(async () => {
+    try {
+      const res = await fetch("/api/projects");
+      const json = await res.json();
+      const allProjects: Project[] = json.data || [];
+      const memberProjects: Project[] = [];
+      for (const project of allProjects) {
+        const memRes = await fetch(`/api/projects/${project.id}/memories`);
+        const memJson = await memRes.json();
+        const memories = memJson.data || [];
+        if (memories.some((m: any) => m.id === id)) {
+          memberProjects.push(project);
+        }
+      }
+      setMemoryProjects(memberProjects);
+    } catch {
+      // ignore
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchMemoryProjects();
+  }, [fetchMemoryProjects]);
+
+  useEffect(() => {
+    if (!projectDialogOpen) {
+      fetchMemoryProjects();
+    }
+  }, [projectDialogOpen, fetchMemoryProjects]);
 
   const handleToggleFavorite = async () => {
     if (!memory) return;
@@ -116,6 +155,13 @@ export default function MemoryDetailPage({
                   : "text-muted-foreground/50 hover:text-amber-400"
               )}
             />
+          </button>
+          <button
+            onClick={() => setAiPanelOpen(true)}
+            className="p-2.5 rounded-xl hover:bg-amber-50 text-muted-foreground/50 hover:text-amber-600 transition-all"
+            title="Bearbeta med AI"
+          >
+            <Wand2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
           </button>
           <button
             onClick={handleDelete}
@@ -236,6 +282,13 @@ export default function MemoryDetailPage({
         </div>
       )}
 
+      {/* Snapshot viewer */}
+      <SnapshotViewer
+        snapshotHtml={memory.snapshot_html}
+        snapshotTakenAt={memory.snapshot_taken_at}
+        linkUrl={memory.link_url}
+      />
+
       {/* Notes thread */}
       <NotesThread memoryId={id} />
 
@@ -265,6 +318,43 @@ export default function MemoryDetailPage({
         </div>
       )}
 
+      {/* Projekt */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.12em]">
+            Projekt
+          </h2>
+          <button
+            onClick={() => setProjectDialogOpen(true)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium text-primary hover:bg-accent transition-all"
+          >
+            <FolderPlus className="h-3.5 w-3.5" />
+            Lägg till
+          </button>
+        </div>
+        {memoryProjects.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {memoryProjects.map((project) => (
+              <Link
+                key={project.id}
+                href={`/projekt/${project.id}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium bg-accent/80 text-muted-foreground border border-border/30 transition-colors hover:border-border/60"
+              >
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: project.color }}
+                />
+                {project.name}
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[12px] text-muted-foreground/40">
+            Inte kopplad till något projekt
+          </p>
+        )}
+      </div>
+
       {/* Metadata footer */}
       <div className="flex items-center gap-6 text-[11px] text-muted-foreground/30 pt-8 border-t border-border/30 font-medium">
         <span>ID: {memory.id.slice(0, 8)}...</span>
@@ -273,6 +363,20 @@ export default function MemoryDetailPage({
           {format(new Date(memory.updated_at), "d MMM yyyy, HH:mm", { locale: sv })}
         </span>
       </div>
+
+      {/* AI Actions Panel */}
+      <AiActionsPanel
+        memoryId={id}
+        open={aiPanelOpen}
+        onClose={() => setAiPanelOpen(false)}
+      />
+
+      {/* Add to Project Dialog */}
+      <AddToProjectDialog
+        memoryId={id}
+        open={projectDialogOpen}
+        onClose={() => setProjectDialogOpen(false)}
+      />
     </div>
   );
 }

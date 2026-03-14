@@ -1,0 +1,357 @@
+/* Amber Archive theme for browser extension */
+:root {
+  --bg: #faf8f5;
+  --bg-card: #ffffff;
+  --text: #1a1612;
+  --text-muted: #8a7e72;
+  --text-faint: #b8ad9e;
+  --amber: #b45309;
+  --amber-light: #fbbf24;
+  --amber-bg: rgba(180, 83, 9, 0.06);
+  --border: rgba(0, 0, 0, 0.06);
+  --border-hover: rgba(0, 0, 0, 0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --success: #16a34a;
+  --error: #dc2626;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.container {
+  padding: 16px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--amber-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--amber);
+}
+
+.logo-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Fields */
+.field {
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.field .optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.url-display {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 8px 10px;
+  background: var(--amber-bg);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  max-height: 40px;
+  overflow: hidden;
+}
+
+.field input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--bg-card);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input[type="text"]:focus {
+  border-color: var(--amber);
+}
+
+.field input[type="text"]::placeholder {
+  color: var(--text-faint);
+}
+
+/* Tags */
+.tags-container {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  background: var(--bg-card);
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.tags-list:empty {
+  margin-bottom: 0;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+.tag-remove {
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 13px;
+  line-height: 1;
+  border: none;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+.tag-input-row {
+  display: flex;
+  gap: 4px;
+}
+
+.tag-input-row input {
+  flex: 1;
+  border: none;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: transparent;
+  outline: none;
+  color: var(--text);
+}
+
+.tag-input-row input::placeholder {
+  color: var(--text-faint);
+}
+
+.btn-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-small:hover {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+/* Unfurl preview */
+.unfurl-preview {
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.unfurl-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.unfurl-meta {
+  padding: 8px 10px;
+}
+
+.unfurl-domain {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--amber);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #92400e;
+}
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--amber-bg);
+  border-color: var(--amber);
+}
+
+/* States */
+.success-state {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.success-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.success-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.success-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.error-state {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.not-configured {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.not-configured p {
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.hidden {
+  display: none !important;
+}

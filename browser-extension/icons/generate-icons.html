@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate Icons</title></head>
+<body>
+<p>Open this file in a browser, right-click each canvas, and "Save image as" with the correct filename.</p>
+<div id="icons"></div>
+<script>
+const sizes = [16, 48, 128];
+const container = document.getElementById('icons');
+
+sizes.forEach(size => {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Background circle
+  const r = size / 2;
+  ctx.beginPath();
+  ctx.arc(r, r, r, 0, Math.PI * 2);
+  ctx.fillStyle = '#b45309';
+  ctx.fill();
+
+  // Inner circle (amber glow)
+  ctx.beginPath();
+  ctx.arc(r, r, r * 0.35, 0, Math.PI * 2);
+  ctx.fillStyle = '#fbbf24';
+  ctx.fill();
+
+  // Label
+  const label = document.createElement('p');
+  label.textContent = `icon-${size}.png — right-click → Save image as`;
+  container.appendChild(label);
+  container.appendChild(canvas);
+  container.appendChild(document.createElement('br'));
+});
+</script>
+</body>
+</html>

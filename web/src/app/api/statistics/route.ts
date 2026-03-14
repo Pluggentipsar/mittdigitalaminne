@@ -45,6 +45,12 @@ export async function GET() {
     .sort((a: any, b: any) => b.count - a.count)
     .slice(0, 10);
 
+  // Inbox count
+  const { count: inbox_count } = await supabase
+    .from("memories")
+    .select("*", { count: "exact", head: true })
+    .eq("is_inbox", true);
+
   // Recent
   const { data: recent } = await supabase
     .from("memories")
@@ -57,6 +63,7 @@ export async function GET() {
       total: total || 0,
       this_week: this_week || 0,
       favorites: favorites || 0,
+      inbox_count: inbox_count || 0,
       by_type,
       top_tags,
       recent: recent || [],

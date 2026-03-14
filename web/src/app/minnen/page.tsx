@@ -12,7 +12,7 @@ function MinnenContent() {
   const searchParams = useSearchParams();
   const spaceId = searchParams.get("space");
   const { spaces } = useSpaces();
-  const [filters, setFilters] = useState<MemoryFilters>({});
+  const [filters, setFilters] = useState<MemoryFilters>({ is_inbox: false });
   const [activeSpaceName, setActiveSpaceName] = useState<string | null>(null);
   const { memories, count, isLoading, mutate } = useMemories(filters);
 

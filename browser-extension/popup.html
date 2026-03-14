@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mitt Digitala Minne</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">Mitt Minne</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="main-content">
+      <!-- URL display -->
+      <div class="field">
+        <label>URL</label>
+        <div class="url-display" id="page-url"></div>
+      </div>
+
+      <!-- Title -->
+      <div class="field">
+        <label>Titel</label>
+        <input type="text" id="page-title" placeholder="Laddar...">
+      </div>
+
+      <!-- Tags -->
+      <div class="field">
+        <label>Taggar <span class="optional">(valfritt)</span></label>
+        <div class="tags-container">
+          <div class="tags-list" id="tags-list"></div>
+          <div class="tag-input-row">
+            <input type="text" id="tag-input" placeholder="Lägg till tagg...">
+            <button id="add-tag-btn" class="btn-small">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unfurl preview -->
+      <div id="unfurl-preview" class="unfurl-preview hidden">
+        <img id="unfurl-image" class="unfurl-image" alt="">
+        <div class="unfurl-meta">
+          <span id="unfurl-domain" class="unfurl-domain"></span>
+        </div>
+      </div>
+
+      <!-- Loading indicator -->
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <span>Hämtar information...</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button id="save-inbox" class="btn btn-secondary">Spara till inkorg</button>
+        <button id="save-now" class="btn btn-primary">Spara</button>
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div id="success-state" class="success-state hidden">
+      <div class="success-icon">&#10003;</div>
+      <p class="success-text">Sparad!</p>
+      <p class="success-sub" id="success-sub"></p>
+    </div>
+
+    <!-- Error state -->
+    <div id="error-state" class="error-state hidden">
+      <p class="error-text" id="error-text"></p>
+      <button id="retry-btn" class="btn btn-primary">Försök igen</button>
+    </div>
+
+    <!-- Not configured -->
+    <div id="not-configured" class="not-configured hidden">
+      <p>Ange server-URL och API-nyckel i inställningar.</p>
+      <button id="open-options" class="btn btn-primary">Öppna inställningar</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

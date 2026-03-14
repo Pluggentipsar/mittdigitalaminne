@@ -52,6 +52,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
     content_type_hint?: string | null;
     video_id?: string;
     channel_name?: string;
+    snapshot_html?: string;
   } | null>(null);
   const lastUnfurledUrl = useRef("");
   const { suggestions, loading: suggestionsLoading, fetchSuggestions } = useTagSuggestions();
@@ -184,6 +185,12 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       }
 
       if (mode === "create") {
+        body.is_inbox = false;
+        // Store snapshot if available from unfurl
+        if (unfurlData?.snapshot_html) {
+          body.snapshot_html = unfurlData.snapshot_html;
+          body.snapshot_taken_at = new Date().toISOString();
+        }
         const res = await fetch("/api/memories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

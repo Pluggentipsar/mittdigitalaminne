@@ -5,6 +5,7 @@ import type { MemoryStats } from "@/lib/types";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RecentMemories } from "@/components/dashboard/RecentMemories";
 import { TypeDistribution } from "@/components/dashboard/TypeDistribution";
+import { TimeCapsule } from "@/components/dashboard/TimeCapsule";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -53,6 +54,8 @@ export default function DashboardPage() {
           />
         </div>
       </div>
+
+      <TimeCapsule />
     </div>
   );
 }

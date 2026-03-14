@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Mitt Digitala Minne - Inställningar</title>
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --text: #1a1612;
+      --text-muted: #8a7e72;
+      --amber: #b45309;
+      --amber-bg: rgba(180, 83, 9, 0.06);
+      --border: rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --success: #16a34a;
+      --error: #dc2626;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+    .field {
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--amber);
+    }
+    .field .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--amber);
+      color: white;
+    }
+    .btn-primary:hover { background: #92400e; }
+    .btn-secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--amber-bg);
+    }
+    #status {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    #status.success {
+      background: rgba(22, 163, 74, 0.08);
+      color: var(--success);
+    }
+    #status.error {
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--error);
+    }
+    #status.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Inställningar</h1>
+  <p class="subtitle">Konfigurera anslutningen till Mitt Digitala Minne</p>
+
+  <div class="field">
+    <label>Server-URL</label>
+    <input type="url" id="server-url" placeholder="https://web-six-chi-75.vercel.app">
+    <p class="hint">URL:en till din Mitt Digitala Minne-instans</p>
+  </div>
+
+  <div class="field">
+    <label>API-nyckel</label>
+    <input type="password" id="api-key" placeholder="Din API-nyckel">
+    <p class="hint">Ställs in som EXTENSION_API_KEY i .env.local</p>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="save-btn">Spara</button>
+    <button class="btn btn-secondary" id="test-btn">Testa anslutning</button>
+  </div>
+
+  <div id="status" class="hidden"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>

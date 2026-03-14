@@ -12,6 +12,9 @@ export interface Memory {
   link_metadata: LinkMetadata | null;
   source: "mcp" | "web" | "manual";
   is_favorite: boolean;
+  is_inbox: boolean;
+  snapshot_html: string | null;
+  snapshot_taken_at: string | null;
   created_at: string;
   updated_at: string;
   tags?: Tag[];
@@ -55,6 +58,7 @@ export interface MemoryFilters {
   date_from?: string;
   date_to?: string;
   favorites_only?: boolean;
+  is_inbox?: boolean;
   sort?: "newest" | "oldest" | "title";
   limit?: number;
   offset?: number;
@@ -83,10 +87,25 @@ export interface SmartSpace {
   memory_count?: number;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string;
+  icon: string;
+  deadline: string | null;
+  status: "active" | "archived";
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  memory_count?: number;
+}
+
 export interface MemoryStats {
   total: number;
   this_week: number;
   favorites: number;
+  inbox_count: number;
   by_type: Record<ContentType, number>;
   top_tags: { name: string; count: number }[];
   recent: { id: string; title: string; content_type: ContentType; created_at: string }[];
