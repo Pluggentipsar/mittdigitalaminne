@@ -169,14 +169,23 @@ async function unfurlGeneric(url: string): Promise<UnfurlResult> {
       snapshot_html = stripped;
     }
 
+    const decodedTitle = title ? decodeHTMLEntities(title) : null;
+    const decodedDesc = description ? decodeHTMLEntities(description) : null;
+
+    // Smart-truncate long social media titles (Instagram/LinkedIn captions)
+    const { title: truncatedTitle, fullCaption } = smartTruncateTitle(decodedTitle, typeHint);
+
+    // If the full caption was truncated, store it as article_text so nothing is lost
+    const finalArticleText = article_text || fullCaption || undefined;
+
     return {
-      title: title ? decodeHTMLEntities(title) : null,
-      description: description ? decodeHTMLEntities(description) : null,
+      title: truncatedTitle,
+      description: decodedDesc,
       image: absUrl(image),
       favicon: absUrl(favicon),
       domain,
       content_type_hint: typeHint,
-      article_text,
+      article_text: finalArticleText,
       snapshot_html,
       author,
       word_count,
@@ -195,7 +204,40 @@ function decodeHTMLEntities(text: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
     .replace(/&#x27;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)));
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(parseInt(n)));
+}
+
+/**
+ * For Instagram/LinkedIn, OG titles often contain the entire post caption.
+ * Truncate to a sensible length and return the full text separately.
+ */
+function smartTruncateTitle(
+  title: string | null,
+  typeHint: string | null
+): { title: string | null; fullCaption: string | null } {
+  if (!title) return { title: null, fullCaption: null };
+
+  const maxLength = 120;
+  if (title.length <= maxLength) return { title, fullCaption: null };
+
+  // Only truncate for social platforms
+  if (typeHint !== "instagram" && typeHint !== "linkedin") {
+    return { title, fullCaption: null };
+  }
+
+  const fullCaption = title;
+
+  // Truncate at last word boundary before maxLength
+  let truncated = title.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > 60) {
+    truncated = truncated.slice(0, lastSpace);
+  }
+  // Remove trailing punctuation that looks odd before ellipsis
+  truncated = truncated.replace(/[,;:\s]+$/, "");
+
+  return { title: truncated + "…", fullCaption };
 }
 
 export async function POST(req: NextRequest) {
