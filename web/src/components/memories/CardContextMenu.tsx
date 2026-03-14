@@ -5,6 +5,7 @@ import {
   Star,
   FolderPlus,
   FileDown,
+  FileText,
   ExternalLink,
   Trash2,
   ChevronRight,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Memory, Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { downloadAsText, downloadAsDocx } from "@/lib/export";
 
 interface CardContextMenuProps {
   memory: Memory;
@@ -77,32 +79,12 @@ export function CardContextMenu({
   }, [onClose]);
 
   const handleExportText = () => {
-    const parts: string[] = [];
-    parts.push(memory.title);
-    parts.push("");
-    if (memory.link_url) parts.push(`Länk: ${memory.link_url}`);
-    if (memory.summary) {
-      parts.push("--- Sammanfattning ---");
-      parts.push(memory.summary);
-    }
-    if (memory.original_content) {
-      parts.push("");
-      parts.push("--- Innehåll ---");
-      parts.push(memory.original_content);
-    }
-    parts.push("");
-    parts.push(`Sparad: ${new Date(memory.created_at).toLocaleString("sv-SE")}`);
-    if (memory.tags?.length) {
-      parts.push(`Taggar: ${memory.tags.map((t) => t.name).join(", ")}`);
-    }
+    downloadAsText(memory);
+    onClose();
+  };
 
-    const blob = new Blob([parts.join("\n")], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${memory.title.slice(0, 50).replace(/[^a-zA-ZåäöÅÄÖ0-9 -]/g, "")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportDocx = async () => {
+    await downloadAsDocx(memory);
     onClose();
   };
 
@@ -196,15 +178,24 @@ export function CardContextMenu({
 
       <div className="h-px bg-border/40 mx-2 my-1" />
 
-      {/* Exportera som text */}
+      {/* Export options */}
       {(memory.original_content || memory.summary) && (
-        <button
-          onClick={handleExportText}
-          className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
-        >
-          <FileDown className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
-          Exportera som text
-        </button>
+        <>
+          <button
+            onClick={handleExportText}
+            className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+          >
+            <FileDown className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+            Ladda ned som .txt
+          </button>
+          <button
+            onClick={handleExportDocx}
+            className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+          >
+            <FileText className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+            Ladda ned som .docx
+          </button>
+        </>
       )}
 
       {/* Öppna original */}

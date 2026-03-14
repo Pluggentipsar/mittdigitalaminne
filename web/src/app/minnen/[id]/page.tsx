@@ -15,6 +15,9 @@ import {
   BookOpen,
   Wand2,
   FolderPlus,
+  Download,
+  FileDown,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemory } from "@/hooks/useMemories";
@@ -30,6 +33,7 @@ import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
 import { InstagramEmbed } from "@/components/memories/previews/InstagramEmbed";
 import { contentTypeConfig, cn } from "@/lib/utils";
+import { downloadAsText, downloadAsDocx } from "@/lib/export";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
 import type { Project } from "@/lib/types";
@@ -45,6 +49,7 @@ export default function MemoryDetailPage({
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [memoryProjects, setMemoryProjects] = useState<Project[]>([]);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
   const fetchMemoryProjects = useCallback(async () => {
     try {
@@ -164,6 +169,49 @@ export default function MemoryDetailPage({
           >
             <Wand2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
           </button>
+          {/* Export dropdown */}
+          {(memory.original_content || memory.summary) && (
+            <div className="relative">
+              <button
+                onClick={() => setExportMenuOpen(!exportMenuOpen)}
+                className="p-2.5 rounded-xl hover:bg-accent text-muted-foreground/50 hover:text-foreground transition-all"
+                title="Ladda ned"
+              >
+                <Download className="h-[17px] w-[17px]" strokeWidth={1.5} />
+              </button>
+              {exportMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setExportMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[180px] bg-card rounded-xl border border-border/60 shadow-lg py-1.5 animate-scale-in"
+                       style={{ transformOrigin: "top right" }}>
+                    <button
+                      onClick={() => {
+                        downloadAsText(memory);
+                        setExportMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+                    >
+                      <FileDown className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+                      Ladda ned som .txt
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await downloadAsDocx(memory);
+                        setExportMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+                    >
+                      <FileText className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+                      Ladda ned som .docx
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           <button
             onClick={handleDelete}
             className="p-2.5 rounded-xl hover:bg-red-50 text-muted-foreground/50 hover:text-destructive transition-all"
