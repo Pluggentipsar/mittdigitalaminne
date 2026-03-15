@@ -35,10 +35,8 @@ export async function GET(req: NextRequest) {
   } else if (sort === "relevance") {
     query = query.order("relevance_score", { ascending: false });
   } else if (sort === "smart") {
-    // Smart sort: unread first, then by recency
-    query = query
-      .order("is_read", { ascending: true })
-      .order("fetched_at", { ascending: false });
+    // Smart sort: fetch broadly, then score client-side
+    query = query.order("fetched_at", { ascending: false });
   } else {
     // newest (default)
     query = query.order("fetched_at", { ascending: false });
@@ -86,47 +84,79 @@ export async function GET(req: NextRequest) {
 }
 
 /**
- * Smart interleave: distributes items from different sources evenly
- * so the feed feels diverse. Unread items are prioritized.
+ * Calculate a recency score (0–1) with exponential decay.
+ * today = 1.0, 1 day = ~0.85, 3 days = ~0.6, 1 week = ~0.35, 2 weeks = ~0.12
+ */
+function recencyScore(dateStr: string | null): number {
+  if (!dateStr) return 0.1;
+  const ageMs = Date.now() - new Date(dateStr).getTime();
+  const ageHours = Math.max(0, ageMs / 3600000);
+  // Half-life of ~48 hours
+  return Math.exp(-0.015 * ageHours);
+}
+
+/**
+ * Smart sort: ranks items by a combined score of relevance, recency,
+ * and unread status, then interleaves to ensure source diversity.
+ *
+ * Score = relevance * 0.35 + recency * 0.40 + unread * 0.25
+ * After scoring, items are picked greedily with a diversity penalty
+ * for consecutive items from the same source.
  */
 function smartInterleave(items: any[]): any[] {
   if (items.length <= 1) return items;
 
-  const unread = items.filter((i) => !i.is_read);
-  const read = items.filter((i) => i.is_read);
+  // Score each item
+  const scored = items.map((item) => {
+    const relevance = item.relevance_score || 0;
+    const recency = recencyScore(item.published_at || item.fetched_at);
+    const unreadBonus = item.is_read ? 0 : 1;
 
-  return [...interleaveBySource(unread), ...interleaveBySource(read)];
-}
+    const score = relevance * 0.35 + recency * 0.40 + unreadBonus * 0.25;
 
-function interleaveBySource(items: any[]): any[] {
-  if (items.length <= 1) return items;
-
-  // Group by source_id
-  const groups = new Map<string, any[]>();
-  for (const item of items) {
-    const key = item.source_id;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(item);
-  }
-
-  // Round-robin pick from each source
-  const result: any[] = [];
-  const queues = Array.from(groups.values());
-
-  // Sort queues: higher relevance sources first
-  queues.sort((a, b) => {
-    const scoreA = a[0]?.relevance_score || 0;
-    const scoreB = b[0]?.relevance_score || 0;
-    return scoreB - scoreA;
+    return { item, score };
   });
 
-  const maxLen = Math.max(...queues.map((q) => q.length));
-  for (let i = 0; i < maxLen; i++) {
-    for (const queue of queues) {
-      if (i < queue.length) {
-        result.push(queue[i]);
+  // Sort by score descending
+  scored.sort((a, b) => b.score - a.score);
+
+  // Greedy pick with diversity: penalize picking from same source as recent picks
+  const result: any[] = [];
+  const remaining = new Set(scored.map((_, i) => i));
+  const recentSources: string[] = []; // track last N sources picked
+
+  while (remaining.size > 0) {
+    let bestIdx = -1;
+    let bestAdjusted = -Infinity;
+
+    for (const idx of remaining) {
+      const { item, score } = scored[idx];
+      let adjusted = score;
+
+      // Penalize if this source appeared recently in picks
+      const sourceId = item.source_id;
+      const lastPos = recentSources.lastIndexOf(sourceId);
+      if (lastPos !== -1) {
+        const distance = recentSources.length - lastPos;
+        // Stronger penalty the more recent the same source appeared
+        adjusted -= 0.3 / distance;
+      }
+
+      if (adjusted > bestAdjusted) {
+        bestAdjusted = adjusted;
+        bestIdx = idx;
       }
     }
+
+    if (bestIdx === -1) break;
+
+    const picked = scored[bestIdx];
+    result.push(picked.item);
+    remaining.delete(bestIdx);
+
+    recentSources.push(picked.item.source_id);
+    // Only track last 4 picks for diversity window
+    if (recentSources.length > 4) recentSources.shift();
   }
 
   return result;
