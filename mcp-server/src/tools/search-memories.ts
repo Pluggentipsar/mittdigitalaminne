@@ -8,6 +8,7 @@ export async function handleSearchMemories(supabase: SupabaseClient, args: Recor
     date_from,
     date_to,
     favorites_only,
+    inbox,
     limit = 20,
     offset = 0,
   } = args;
@@ -21,6 +22,7 @@ export async function handleSearchMemories(supabase: SupabaseClient, args: Recor
     filter_date_from: (date_from as string) || null,
     filter_date_to: (date_to as string) || null,
     filter_favorites_only: !!favorites_only,
+    filter_inbox: inbox != null ? !!inbox : null,
     sort_by: "relevance",
     result_limit: limit as number,
     result_offset: offset as number,

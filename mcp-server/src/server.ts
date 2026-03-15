@@ -44,6 +44,7 @@ export function createServer(supabase: SupabaseClient): McpServer {
       date_from: z.string().optional().describe("ISO 8601 date for start of range"),
       date_to: z.string().optional().describe("ISO 8601 date for end of range"),
       favorites_only: z.boolean().optional().describe("Only return favorited memories"),
+      inbox: z.boolean().optional().describe("Filter by inbox status: true = only inbox items, false = only processed items, omit = all"),
       limit: z.number().optional().describe("Max results (default 20)"),
       offset: z.number().optional().describe("Offset for pagination"),
     },
