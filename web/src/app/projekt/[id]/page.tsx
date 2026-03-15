@@ -254,7 +254,7 @@ export default function ProjectDetailPage({
           </button>
           <button
             onClick={handleDelete}
-            className="p-2.5 rounded-xl hover:bg-red-50 text-muted-foreground/50 hover:text-destructive transition-all"
+            className="p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-muted-foreground/50 hover:text-destructive transition-all"
             title="Ta bort"
           >
             <Trash2 className="h-[17px] w-[17px]" strokeWidth={1.5} />

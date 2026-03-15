@@ -47,8 +47,8 @@ export function SortableMemoryCard({
         {...listeners}
         className={cn(
           "absolute top-3 left-3 z-10 flex items-center justify-center w-7 h-7 rounded-lg",
-          "bg-white/90 backdrop-blur-sm border border-border/60 shadow-xs",
-          "text-muted-foreground/30 hover:text-muted-foreground/70 hover:bg-white",
+          "bg-white/90 dark:bg-card/90 backdrop-blur-sm border border-border/60 shadow-xs",
+          "text-muted-foreground/30 hover:text-muted-foreground/70 hover:bg-white dark:hover:bg-card",
           "cursor-grab active:cursor-grabbing transition-all duration-200",
           "opacity-0 group-hover/sortable:opacity-100 focus:opacity-100",
           isDragging && "opacity-100 cursor-grabbing"

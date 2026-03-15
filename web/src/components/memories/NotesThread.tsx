@@ -54,7 +54,7 @@ export function NotesThread({ memoryId }: NotesThreadProps) {
                 </span>
                 <button
                   onClick={() => deleteNote(note.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-red-50 transition-all"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
                   title="Ta bort"
                 >
                   <Trash2 className="h-3.5 w-3.5" />

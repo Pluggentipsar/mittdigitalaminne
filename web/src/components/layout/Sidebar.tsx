@@ -19,10 +19,13 @@ import {
   Inbox,
   Search,
   Command,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import useSWR from "swr";
 
 const navItems = [
@@ -41,6 +44,7 @@ export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { spaces, deleteSpace } = useSpaces();
   const { collapsed, toggle } = useSidebar();
+  const { resolved: currentTheme, toggle: toggleTheme } = useTheme();
   const { data: statsData } = useSWR<{ data: { inbox_count: number } }>("/api/statistics", statsFetcher, { refreshInterval: 30000 });
   const inboxCount = statsData?.data?.inbox_count || 0;
 
@@ -143,7 +147,20 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="px-5 py-5">
+      <div className="px-5 py-5 space-y-3">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 w-full rounded-xl px-4 py-2.5 text-[12px] font-medium text-sidebar-foreground/35 hover:text-sidebar-foreground/60 hover:bg-sidebar-muted transition-all duration-200"
+        >
+          {currentTheme === "dark" ? (
+            <Sun className="h-4 w-4 text-amber-400/70" strokeWidth={1.5} />
+          ) : (
+            <Moon className="h-4 w-4 text-sidebar-foreground/30" strokeWidth={1.5} />
+          )}
+          {currentTheme === "dark" ? "Ljust l\u00e4ge" : "M\u00f6rkt l\u00e4ge"}
+        </button>
+
         <div className="relative rounded-xl overflow-hidden px-4 py-3.5 border border-sidebar-foreground/[0.04]">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.06] via-transparent to-amber-500/[0.02]" />
           <div className="relative flex items-center gap-2 mb-1">
@@ -346,8 +363,29 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Collapse toggle button */}
-      <div className={cn("border-t border-sidebar-foreground/[0.04] transition-all duration-300", collapsed ? "px-2 py-3" : "px-5 py-3")}>
+      {/* Theme toggle + Collapse toggle */}
+      <div className={cn("border-t border-sidebar-foreground/[0.04] transition-all duration-300", collapsed ? "px-2 py-3 space-y-1" : "px-5 py-3 space-y-1")}>
+        <button
+          onClick={toggleTheme}
+          className={cn(
+            "flex items-center rounded-lg text-sidebar-foreground/25 hover:text-sidebar-foreground/50 hover:bg-sidebar-foreground/5 transition-all duration-200",
+            collapsed
+              ? "justify-center w-full py-2"
+              : "gap-2.5 px-3 py-2 w-full"
+          )}
+          title={currentTheme === "dark" ? "Ljust läge" : "Mörkt läge"}
+        >
+          {currentTheme === "dark" ? (
+            <Sun className="h-4 w-4 text-amber-400/70" strokeWidth={1.5} />
+          ) : (
+            <Moon className="h-4 w-4" strokeWidth={1.5} />
+          )}
+          {!collapsed && (
+            <span className="text-[11px] font-medium">
+              {currentTheme === "dark" ? "Ljust" : "Mörkt"}
+            </span>
+          )}
+        </button>
         <button
           onClick={toggle}
           className={cn(
@@ -392,8 +430,19 @@ export function Sidebar() {
           </span>
         </div>
         <button
+          onClick={toggleTheme}
+          className="p-2 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground/80 hover:bg-sidebar-foreground/10 transition-colors"
+          title={currentTheme === "dark" ? "Ljust läge" : "Mörkt läge"}
+        >
+          {currentTheme === "dark" ? (
+            <Sun className="h-4.5 w-4.5 text-amber-400/70" />
+          ) : (
+            <Moon className="h-4.5 w-4.5" />
+          )}
+        </button>
+        <button
           onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
-          className="ml-auto p-2 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground/80 hover:bg-sidebar-foreground/10 transition-colors"
+          className="p-2 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground/80 hover:bg-sidebar-foreground/10 transition-colors"
           title="Sök"
         >
           <Search className="h-4.5 w-4.5" />

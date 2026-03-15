@@ -68,6 +68,36 @@
   --shadow-glow-amber: 0 4px 24px rgba(180, 83, 9, 0.08), 0 0 0 1px rgba(180, 83, 9, 0.03);
 }
 
+/* === Dark Mode === */
+.dark {
+  --background: #0e0d0c;
+  --foreground: #e8e4de;
+  --muted: #1a1917;
+  --muted-foreground: #8a847d;
+  --border: #2a2724;
+  --card: #161514;
+  --card-foreground: #e8e4de;
+
+  --primary: #d97706;
+  --primary-foreground: #ffffff;
+
+  --accent: #1e1c19;
+  --accent-foreground: #e8e4de;
+
+  --sidebar: #0a0a09;
+  --sidebar-foreground: #faf8f5;
+  --sidebar-muted: rgba(250, 248, 245, 0.06);
+  --sidebar-active: rgba(217, 119, 6, 0.12);
+
+  --destructive: #ef4444;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-glow-amber: 0 4px 24px rgba(217, 119, 6, 0.15), 0 0 0 1px rgba(217, 119, 6, 0.06);
+}
+
 /* === Base === */
 body {
   background: var(--background);
@@ -235,6 +265,42 @@ body::before {
 .badge-type-instagram { background: rgba(219, 39, 119, 0.08); color: #be185d; }
 .badge-type-twitter { background: rgba(29, 155, 240, 0.08); color: #1a8cd8; }
 
+/* === Dark mode badge overrides === */
+.dark .badge-type-image { background: rgba(217, 119, 6, 0.15); color: #f59e0b; }
+.dark .badge-type-link { background: rgba(3, 105, 161, 0.18); color: #38bdf8; }
+.dark .badge-type-article { background: rgba(4, 120, 87, 0.18); color: #34d399; }
+.dark .badge-type-thought { background: rgba(124, 58, 237, 0.18); color: #a78bfa; }
+.dark .badge-type-youtube { background: rgba(220, 38, 38, 0.18); color: #f87171; }
+.dark .badge-type-linkedin { background: rgba(10, 102, 194, 0.18); color: #60a5fa; }
+.dark .badge-type-instagram { background: rgba(219, 39, 119, 0.18); color: #f472b6; }
+.dark .badge-type-twitter { background: rgba(29, 155, 240, 0.18); color: #7dd3fc; }
+
+/* Dark mode skeleton */
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    rgba(255, 255, 255, 0.06) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Dark mode selection */
+.dark ::selection {
+  background: rgba(217, 119, 6, 0.25);
+  color: var(--foreground);
+}
+
+/* Dark mode grain */
+.dark body::before {
+  opacity: 0.03;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb { background: #333; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #555; }
+
 /* === Card hover === */
 .card-hover {
   transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -262,6 +328,16 @@ body::before {
 .card-glow-linkedin:hover { box-shadow: 0 8px 24px rgba(10, 102, 194, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-instagram:hover { box-shadow: 0 8px 24px rgba(219, 39, 119, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-twitter:hover { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.10), var(--shadow-sm); transform: translateY(-3px); }
+
+/* Dark mode card glow — more intense for dark backgrounds */
+.dark .card-glow-image:hover { box-shadow: 0 8px 24px rgba(217, 119, 6, 0.18), var(--shadow-sm); }
+.dark .card-glow-link:hover { box-shadow: 0 8px 24px rgba(3, 105, 161, 0.18), var(--shadow-sm); }
+.dark .card-glow-article:hover { box-shadow: 0 8px 24px rgba(4, 120, 87, 0.18), var(--shadow-sm); }
+.dark .card-glow-thought:hover { box-shadow: 0 8px 24px rgba(124, 58, 237, 0.18), var(--shadow-sm); }
+.dark .card-glow-youtube:hover { box-shadow: 0 8px 24px rgba(220, 38, 38, 0.18), var(--shadow-sm); }
+.dark .card-glow-linkedin:hover { box-shadow: 0 8px 24px rgba(10, 102, 194, 0.18), var(--shadow-sm); }
+.dark .card-glow-instagram:hover { box-shadow: 0 8px 24px rgba(219, 39, 119, 0.18), var(--shadow-sm); }
+.dark .card-glow-twitter:hover { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.18), var(--shadow-sm); }
 
 /* === Accent top line on cards === */
 .accent-line-top {

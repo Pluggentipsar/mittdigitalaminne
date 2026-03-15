@@ -119,7 +119,7 @@ export function MemoryCard({ memory, index, isFocused, selectionMode, isSelected
             "absolute top-3 left-3 z-10 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200",
             isSelected
               ? "bg-amber-500 border-amber-500 text-white shadow-sm"
-              : "bg-white/90 border-border/80 hover:border-amber-400 backdrop-blur-sm"
+              : "bg-white/90 dark:bg-card/90 border-border/80 hover:border-amber-400 backdrop-blur-sm"
           )}
         >
           {isSelected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
@@ -236,7 +236,7 @@ export function MemoryCard({ memory, index, isFocused, selectionMode, isSelected
                     e.stopPropagation();
                     onDelete?.(memory.id);
                   }}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
+                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 dark:hover:bg-red-500/10"
                   title="Ta bort"
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-destructive transition-colors" />

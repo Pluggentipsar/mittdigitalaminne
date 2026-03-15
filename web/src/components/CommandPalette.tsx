@@ -366,7 +366,7 @@ export function CommandPalette() {
       {/* Palette container */}
       <div className="relative flex items-start justify-center pt-[15vh] px-4">
         <div
-          className="w-full max-w-[560px] bg-white rounded-2xl shadow-lg overflow-hidden animate-scale-in"
+          className="w-full max-w-[560px] bg-card rounded-2xl shadow-lg overflow-hidden animate-scale-in"
           style={{
             boxShadow:
               "0 24px 64px rgba(28, 25, 23, 0.14), 0 8px 20px rgba(28, 25, 23, 0.08), 0 0 0 1px rgba(180, 83, 9, 0.06)",
@@ -439,7 +439,7 @@ export function CommandPalette() {
                         className={cn(
                           "flex items-center gap-3 w-full px-5 py-2.5 text-left transition-colors duration-100",
                           isSelected
-                            ? "bg-amber-50/80"
+                            ? "bg-amber-50/80 dark:bg-amber-500/10"
                             : "hover:bg-muted/40"
                         )}
                       >

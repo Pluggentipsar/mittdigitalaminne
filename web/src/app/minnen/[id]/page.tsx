@@ -20,6 +20,7 @@ import {
   FileText,
   Bell,
   BellOff,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemory } from "@/hooks/useMemories";
@@ -30,6 +31,7 @@ import { RelatedMemories } from "@/components/memories/RelatedMemories";
 import { AiActionsPanel } from "@/components/memories/AiActionsPanel";
 import { SnapshotViewer } from "@/components/memories/SnapshotViewer";
 import { AddToProjectDialog } from "@/components/projects/AddToProjectDialog";
+import { ShareDialog } from "@/components/memories/ShareDialog";
 import { YouTubePreview } from "@/components/memories/previews/YouTubePreview";
 import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
@@ -53,6 +55,7 @@ export default function MemoryDetailPage({
   const [memoryProjects, setMemoryProjects] = useState<Project[]>([]);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [reminderMenuOpen, setReminderMenuOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const fetchMemoryProjects = useCallback(async () => {
     try {
@@ -179,7 +182,7 @@ export default function MemoryDetailPage({
               className={cn(
                 "p-2.5 rounded-xl transition-all",
                 memory.remind_at
-                  ? "bg-amber-50 text-amber-600"
+                  ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600"
                   : "hover:bg-accent text-muted-foreground/50 hover:text-foreground"
               )}
               title={memory.remind_at ? `Påminnelse: ${format(new Date(memory.remind_at), "d MMM, HH:mm", { locale: sv })}` : "Påminn mig"}
@@ -238,7 +241,7 @@ export default function MemoryDetailPage({
                           mutate();
                           setReminderMenuOpen(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left text-[13px] font-medium text-destructive hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left text-[13px] font-medium text-destructive hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                       >
                         <BellOff className="h-4 w-4" strokeWidth={1.5} />
                         Ta bort påminnelse
@@ -250,8 +253,15 @@ export default function MemoryDetailPage({
             )}
           </div>
           <button
+            onClick={() => setShareDialogOpen(true)}
+            className="p-2.5 rounded-xl hover:bg-accent text-muted-foreground/50 hover:text-foreground transition-all"
+            title="Dela"
+          >
+            <Share2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
+          </button>
+          <button
             onClick={() => setAiPanelOpen(true)}
-            className="p-2.5 rounded-xl hover:bg-amber-50 text-muted-foreground/50 hover:text-amber-600 transition-all"
+            className="p-2.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-500/10 text-muted-foreground/50 hover:text-amber-600 transition-all"
             title="Bearbeta med AI"
           >
             <Wand2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
@@ -301,7 +311,7 @@ export default function MemoryDetailPage({
           )}
           <button
             onClick={handleDelete}
-            className="p-2.5 rounded-xl hover:bg-red-50 text-muted-foreground/50 hover:text-destructive transition-all"
+            className="p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-muted-foreground/50 hover:text-destructive transition-all"
             title="Ta bort"
           >
             <Trash2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
@@ -528,6 +538,13 @@ export default function MemoryDetailPage({
         memoryId={id}
         open={projectDialogOpen}
         onClose={() => setProjectDialogOpen(false)}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        memoryId={id}
+        open={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
       />
     </div>
   );

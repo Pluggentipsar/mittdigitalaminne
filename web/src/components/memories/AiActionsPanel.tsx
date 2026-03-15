@@ -159,7 +159,7 @@ export function AiActionsPanel({
           {/* Error state */}
           {error && !loading && (
             <div className="px-6 py-6">
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="rounded-xl border border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10 p-4">
                 <p className="text-[13px] text-red-700 font-medium">
                   Något gick fel
                 </p>

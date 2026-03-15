@@ -99,7 +99,7 @@ export function SnapshotViewer({ snapshotHtml, snapshotTakenAt, linkUrl }: Snaps
         </div>
 
         {/* Sandboxed iframe */}
-        <div className="relative bg-white">
+        <div className="relative bg-white dark:bg-neutral-900">
           {expanded && (
             <iframe
               srcDoc={snapshotHtml}

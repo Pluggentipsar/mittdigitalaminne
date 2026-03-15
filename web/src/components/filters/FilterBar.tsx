@@ -117,7 +117,7 @@ export function FilterBar({ filters, onFiltersChange, projects = [] }: FilterBar
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200",
               filters.favorites_only
-                ? "bg-amber-50 text-amber-700 shadow-xs"
+                ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >

@@ -12,6 +12,8 @@ import {
   Check,
   Loader2,
   Bell,
+  Share2,
+  Copy,
 } from "lucide-react";
 import type { Memory, Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,8 @@ export function CardContextMenu({
   const [showProjects, setShowProjects] = useState(false);
   const [addingToProject, setAddingToProject] = useState<string | null>(null);
   const [addedToProject, setAddedToProject] = useState<Set<string>>(new Set());
+  const [sharing, setSharing] = useState(false);
+  const [shared, setShared] = useState(false);
 
   // Position the menu within viewport
   const [position, setPosition] = useState({ x, y });
@@ -218,6 +222,41 @@ export function CardContextMenu({
         </button>
       </div>
 
+      {/* Dela — quick share & copy */}
+      <button
+        onClick={async () => {
+          setSharing(true);
+          try {
+            const res = await fetch(`/api/memories/${memory.id}/share`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: "{}",
+            });
+            const json = await res.json();
+            if (json.data?.share_token) {
+              const url = `${window.location.origin}/delad/${json.data.share_token}`;
+              await navigator.clipboard.writeText(url);
+              setShared(true);
+              setTimeout(() => onClose(), 1200);
+            }
+          } catch {
+            // ignore
+          }
+          setSharing(false);
+        }}
+        disabled={sharing}
+        className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors disabled:opacity-50"
+      >
+        {shared ? (
+          <Check className="h-4 w-4 text-emerald-500" strokeWidth={1.5} />
+        ) : sharing ? (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/50" />
+        ) : (
+          <Share2 className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+        )}
+        {shared ? "L\u00e4nk kopierad!" : "Dela & kopiera l\u00e4nk"}
+      </button>
+
       <div className="h-px bg-border/40 mx-2 my-1" />
 
       {/* Export options */}
@@ -262,7 +301,7 @@ export function CardContextMenu({
           onDelete(memory.id);
           onClose();
         }}
-        className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium text-destructive hover:bg-red-50 transition-colors"
+        className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium text-destructive hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
       >
         <Trash2 className="h-4 w-4" strokeWidth={1.5} />
         Ta bort
