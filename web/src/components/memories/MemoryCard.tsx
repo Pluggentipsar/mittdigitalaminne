@@ -9,6 +9,8 @@ import { ContentTypeIcon } from "./ContentTypeIcon";
 
 interface MemoryCardProps {
   memory: Memory;
+  index?: number;
+  isFocused?: boolean;
   onToggleFavorite?: (id: string, current: boolean) => void;
   onDelete?: (id: string) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -18,7 +20,7 @@ interface MemoryCardProps {
 const LONG_PRESS_DURATION = 500;
 const MOVE_THRESHOLD = 10;
 
-export function MemoryCard({ memory, onToggleFavorite, onDelete, onContextMenu, onLongPress }: MemoryCardProps) {
+export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelete, onContextMenu, onLongPress }: MemoryCardProps) {
   const config = contentTypeConfig[memory.content_type];
   const [ogImageError, setOgImageError] = useState(false);
 
@@ -82,7 +84,11 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete, onContextMenu, 
 
   return (
     <div
-      className="group relative animate-fade-in"
+      className={cn(
+        "group relative animate-fade-in",
+        isFocused && "ring-2 ring-amber-400/70 ring-offset-2 ring-offset-background rounded-2xl"
+      )}
+      data-card-index={index}
       onContextMenu={onContextMenu}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -136,6 +142,18 @@ export function MemoryCard({ memory, onToggleFavorite, onDelete, onContextMenu, 
               alt=""
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
               onError={() => setOgImageError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          </div>
+        )}
+
+        {/* Attached image thumbnail for non-image types (e.g. thought with uploaded image) */}
+        {memory.content_type !== "image" && memory.image_url && !memory.link_metadata?.og_image && (
+          <div className="aspect-[2.5/1] bg-muted overflow-hidden relative">
+            <img
+              src={memory.image_url}
+              alt=""
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>

@@ -333,6 +333,12 @@ body::before {
   }
 }
 
+/* === Keyboard focus ring for card navigation === */
+@keyframes focus-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.5); }
+  50% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.8), 0 0 12px rgba(251, 191, 36, 0.15); }
+}
+
 /* === Recharts === */
 .recharts-text {
   font-family: var(--font-body), system-ui, sans-serif;

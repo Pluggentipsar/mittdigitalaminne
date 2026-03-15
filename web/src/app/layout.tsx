@@ -3,6 +3,7 @@ import { DM_Sans, Instrument_Serif } from "next/font/google";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MainContent } from "@/components/layout/MainContent";
+import { CommandPalette } from "@/components/CommandPalette";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -64,6 +65,7 @@ export default function RootLayout({
 
           <Sidebar />
           <MainContent>{children}</MainContent>
+          <CommandPalette />
         </SidebarProvider>
       </body>
     </html>

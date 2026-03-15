@@ -17,6 +17,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Inbox,
+  Search,
+  Command,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSpaces } from "@/hooks/useSpaces";
@@ -187,6 +189,28 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className={cn("flex-1 py-1 space-y-0.5 transition-all duration-300", collapsed ? "px-2" : "px-4")}>
+        {/* Command palette trigger */}
+        {!collapsed ? (
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+            className="flex items-center gap-2.5 w-full rounded-xl px-3 py-2 mb-3 text-[12px] font-medium text-sidebar-foreground/30 hover:text-sidebar-foreground/50 bg-sidebar-muted/50 hover:bg-sidebar-muted transition-all duration-200 border border-sidebar-foreground/[0.04]"
+          >
+            <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+            <span className="flex-1 text-left">Sök...</span>
+            <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-sidebar-foreground/[0.06] text-sidebar-foreground/20 text-[10px] font-medium">
+              <Command className="h-2.5 w-2.5" />K
+            </kbd>
+          </button>
+        ) : (
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+            className="flex items-center justify-center w-full rounded-xl py-2.5 mb-2 text-sidebar-foreground/25 hover:text-sidebar-foreground/50 hover:bg-sidebar-muted transition-all duration-200"
+            title="Sök (⌘K)"
+          >
+            <Search className="h-[17px] w-[17px]" strokeWidth={1.5} />
+          </button>
+        )}
+
         {!collapsed && (
           <p className="px-3 mb-2.5 text-[9px] font-bold text-sidebar-foreground/20 uppercase tracking-[0.15em]">
             Meny
@@ -367,6 +391,13 @@ export function Sidebar() {
             Mitt Minne
           </span>
         </div>
+        <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+          className="ml-auto p-2 rounded-xl text-sidebar-foreground/40 hover:text-sidebar-foreground/80 hover:bg-sidebar-foreground/10 transition-colors"
+          title="Sök"
+        >
+          <Search className="h-4.5 w-4.5" />
+        </button>
       </div>
 
       {/* Mobile overlay */}
