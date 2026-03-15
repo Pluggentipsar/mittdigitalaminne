@@ -60,9 +60,14 @@ export function CardContextMenu({
     }
   }, [x, y]);
 
-  // Close on click outside or Escape
+  // Close on click/touch outside or Escape
   useEffect(() => {
     function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    function handleTouch(e: TouchEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         onClose();
       }
@@ -71,9 +76,11 @@ export function CardContextMenu({
       if (e.key === "Escape") onClose();
     }
     document.addEventListener("mousedown", handleClick);
+    document.addEventListener("touchstart", handleTouch);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("touchstart", handleTouch);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);

@@ -67,6 +67,7 @@ export function MemoryGrid({
             onToggleFavorite={onToggleFavorite}
             onDelete={onDelete}
             onContextMenu={(e) => handleContextMenu(e, memory)}
+            onLongPress={(x, y) => setContextMenu({ memory, x, y })}
           />
         ))}
       </div>

@@ -47,7 +47,7 @@ mittdigitalaminne/
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/mittdigitalaminne.git
+git clone https://github.com/Pluggentipsar/mittdigitalaminne.git
 cd mittdigitalaminne
 
 # Install dependencies for both packages
@@ -67,6 +67,9 @@ supabase/migrations/002_improved_search.sql
 supabase/migrations/003_memory_notes.sql
 supabase/migrations/004_new_content_types.sql
 supabase/migrations/005_smart_spaces.sql
+supabase/migrations/006_inbox.sql
+supabase/migrations/007_projects.sql
+supabase/migrations/008_snapshots.sql
 ```
 
 4. Create a **storage bucket** for images:
@@ -82,6 +85,7 @@ supabase/migrations/005_smart_spaces.sql
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+OPENAI_API_KEY=your_openai_key_here           # For AI features (summarize, tags, etc.)
 ```
 
 **MCP server** — create `mcp-server/.env`:
@@ -124,6 +128,7 @@ Set these environment variables in your Vercel project settings:
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Your service role key |
+| `OPENAI_API_KEY` | Your OpenAI API key |
 
 ### Deploy MCP server to Cloudflare Workers
 
@@ -198,23 +203,71 @@ The MCP server exposes 10 tools that Claude can use:
 
 ## Features
 
-### Core
+### Content Types
 - **7 content types**: Thought, Link, Article, Image, YouTube, LinkedIn, Instagram
-- **Swedish full-text search** with relevance ranking and ILIKE fallback
-- **Tag system** with colors, filtering, and search integration
-- **URL auto-unfurl** — paste a link and get title, description, image preview
-- **YouTube oEmbed** — automatic metadata (title, channel, thumbnail) without API key
-- **Markdown rendering** in summaries and content
-- **Comment threads** (notes) per memory
-- **Rich previews** for YouTube embeds, link cards, social media posts
-- **Dashboard** with statistics, type distribution chart, recent memories
-- **MCP integration** — save and search memories directly from Claude AI
+- Auto-detection of platform from pasted URLs
 
-### Smart Features (inspired by [mymind](https://mymind.com))
-- **Related Memories** — each memory detail page shows up to 6 related memories, ranked by shared tag count
-- **AI Auto-Tag Suggestions** — keyword extraction from title/summary/content matched against existing tags, with suggested new tags shown as clickable pills in the memory form
-- **Distraction-Free Reader** — article text extraction via Mozilla Readability when saving links, auto-fills content field, displays estimated read time
-- **Smart Spaces** — save any active filter combination as a named "Space" that appears in the sidebar for one-click access
+### Rich Previews
+- **YouTube** — embedded video player with thumbnail and play button overlay
+- **Instagram** — full embed of posts/reels with dynamic height via `postMessage`
+- **LinkedIn** — branded text preview with platform colors
+- **Articles & Links** — OG image previews with favicon and domain
+- **Smart title handling** — auto-truncation of long social media titles at ~120 chars
+
+### Search & Filtering
+- **Swedish full-text search** with relevance ranking (weighted: title > summary > content)
+- **Filters** — by content type, tags, project, date range, favorites, inbox status
+- **Smart Spaces** — save any active filter combination as a named space in the sidebar
+
+### Organization
+- **Tags** with colors for categorization
+- **Projects & collections** — group related memories with name, color, icon, deadline, and status (active/archived)
+- **Inbox** — new memories land in inbox until organized
+- **Favorites** — star important memories for quick access
+
+### AI Features
+- **AI summarization** — automatic summary of articles and posts
+- **AI tag suggestions** — keyword extraction matched against existing tags
+- **AI actions panel** — process memories with AI directly in the detail view (summarize, extract key points, translate, etc.)
+- **Related memories** — automatic connections between similar memories based on shared tags
+
+### Web Snapshots
+- Save HTML snapshots of web pages for offline reading
+- View snapshots in a sandboxed iframe within the app
+
+### Export & Download
+- **Download as .txt** — clean text file with title, summary, content, metadata, and tags
+- **Download as .docx** — formatted Word document with typography, headings, bullet lists, and metadata
+- Available from both the context menu (right-click on cards) and the detail view toolbar
+- Works on mobile via long-press
+
+### Context Menu (Desktop & Mobile)
+- **Right-click** (desktop) or **long-press** (mobile, 500ms) on memory cards:
+  - Toggle favorite
+  - Add to project (submenu with active projects)
+  - Download as .txt
+  - Download as .docx
+  - Open original link
+  - Delete memory
+- Haptic feedback on mobile (vibration API)
+- Viewport-aware positioning (menu stays on screen)
+
+### Dashboard
+- Statistics overview with type distribution chart
+- Recent memories list
+- Resurfacing — rediscover old memories that may be relevant again
+
+### Comment Threads
+- Add notes/comments to any memory
+- Threaded discussion per memory
+
+### Design
+- **"Amber Glow" theme** — warm amber accents with content-type colored card glows
+- **Fonts**: Instrument Serif (headings) + DM Sans (body text)
+- **Collapsible sidebar** (72px collapsed, 272px expanded) with localStorage persistence
+- **Responsive** — works on desktop and mobile
+- **Ambient gradient orbs** and decorative dividers
+- Swedish UI throughout
 
 ---
 
@@ -224,46 +277,56 @@ The MCP server exposes 10 tools that Claude can use:
 web/
 ├── src/
 │   ├── app/
-│   │   ├── api/              # API routes
-│   │   │   ├── memories/     # CRUD + notes
-│   │   │   ├── spaces/        # Smart Spaces CRUD
-│   │   │   ├── suggest-tags/  # AI tag suggestions
-│   │   │   ├── unfurl/       # URL metadata + article extraction
-│   │   │   ├── statistics/   # Dashboard stats
-│   │   │   ├── tags/         # Tag management
-│   │   │   └── upload/       # Image upload
-│   │   ├── lagg-till/        # Create memory page
-│   │   ├── minnen/           # Memory list + detail + edit
-│   │   ├── taggar/           # Tag management page
-│   │   └── page.tsx          # Dashboard
+│   │   ├── api/                # API routes
+│   │   │   ├── memories/       # CRUD + notes + related
+│   │   │   ├── projects/       # Projects CRUD + member management
+│   │   │   ├── spaces/         # Smart Spaces CRUD
+│   │   │   ├── suggest-tags/   # AI tag suggestions
+│   │   │   ├── resurface/      # Memory resurfacing
+│   │   │   ├── unfurl/         # URL metadata + article extraction
+│   │   │   ├── statistics/     # Dashboard stats
+│   │   │   ├── tags/           # Tag management
+│   │   │   └── upload/         # Image upload
+│   │   ├── dashboard/          # Dashboard page
+│   │   ├── inkorg/             # Inbox page
+│   │   ├── lagg-till/          # Create memory page
+│   │   ├── minnen/             # Memory list + detail + edit pages
+│   │   ├── projekt/            # Project list + detail pages
+│   │   └── taggar/             # Tag management page
 │   ├── components/
-│   │   ├── memories/         # MemoryCard, MemoryForm, RelatedMemories, previews
-│   │   ├── spaces/           # SaveSpaceDialog
-│   │   ├── dashboard/        # Stats, charts, recent list
-│   │   ├── filters/          # FilterBar (type, tags, search, save space)
-│   │   ├── layout/           # Sidebar navigation + spaces
-│   │   └── ui/               # MarkdownContent
-│   ├── hooks/                # SWR data hooks (memories, tags, spaces, suggestions)
-│   └── lib/                  # Supabase clients, types, utils, stopwords
+│   │   ├── memories/           # MemoryCard, MemoryGrid, CardContextMenu, AiActionsPanel
+│   │   │   └── previews/       # YouTubePreview, InstagramEmbed, SocialPreview, LinkPreview
+│   │   ├── projects/           # AddToProjectDialog, ProjectCard
+│   │   ├── spaces/             # SaveSpaceDialog
+│   │   ├── dashboard/          # Stats, charts, recent list, resurfacing
+│   │   ├── filters/            # FilterBar (type, tags, project, search, save space)
+│   │   ├── layout/             # Sidebar navigation + spaces
+│   │   ├── contexts/           # SidebarContext
+│   │   └── ui/                 # MarkdownContent, SnapshotViewer
+│   ├── hooks/                  # SWR data hooks (memories, tags, spaces, projects, suggestions)
+│   └── lib/                    # Supabase clients, types, utils, export utilities, stopwords
 
 mcp-server/
 ├── src/
-│   ├── server.ts             # MCP server factory (shared logic)
-│   ├── index.ts              # stdio entry point (Claude Desktop)
-│   ├── worker.ts             # Cloudflare Workers entry (Claude.ai)
-│   ├── tools/                # Individual tool handlers
-│   ├── utils/                # URL detection, tag helpers
-│   └── db/                   # Supabase client factory
-├── wrangler.toml             # Cloudflare Workers config
+│   ├── server.ts               # MCP server factory (shared logic)
+│   ├── index.ts                # stdio entry point (Claude Desktop)
+│   ├── worker.ts               # Cloudflare Workers entry (Claude.ai)
+│   ├── tools/                  # Individual tool handlers
+│   ├── utils/                  # URL detection, tag helpers
+│   └── db/                     # Supabase client factory
+├── wrangler.toml               # Cloudflare Workers config
 └── tsconfig.json
 
 supabase/
 └── migrations/
-    ├── 001_initial_schema.sql      # Core tables, FTS, RLS
-    ├── 002_improved_search.sql     # Enhanced search with tags in FTS
-    ├── 003_memory_notes.sql        # Comment/notes table
-    ├── 004_new_content_types.sql   # YouTube, LinkedIn, Instagram types
-    └── 005_smart_spaces.sql        # Smart Spaces (saved filters)
+    ├── 001_initial_schema.sql          # Core tables, FTS, RLS
+    ├── 002_improved_search.sql         # Enhanced search with tags in FTS
+    ├── 003_memory_notes.sql            # Comment/notes table
+    ├── 004_new_content_types.sql       # YouTube, LinkedIn, Instagram types
+    ├── 005_smart_spaces.sql            # Smart Spaces (saved filters)
+    ├── 006_inbox.sql                   # Inbox flag for memories
+    ├── 007_projects.sql                # Projects & memory_projects tables
+    └── 008_snapshots.sql               # Snapshot HTML storage
 ```
 
 ---

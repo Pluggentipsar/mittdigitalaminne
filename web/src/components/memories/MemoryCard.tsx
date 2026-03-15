@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Star, Trash2, ExternalLink, Play } from "lucide-react";
 import type { Memory } from "@/lib/types";
@@ -12,16 +12,85 @@ interface MemoryCardProps {
   onToggleFavorite?: (id: string, current: boolean) => void;
   onDelete?: (id: string) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
+  onLongPress?: (x: number, y: number) => void;
 }
 
-export function MemoryCard({ memory, onToggleFavorite, onDelete, onContextMenu }: MemoryCardProps) {
+const LONG_PRESS_DURATION = 500;
+const MOVE_THRESHOLD = 10;
+
+export function MemoryCard({ memory, onToggleFavorite, onDelete, onContextMenu, onLongPress }: MemoryCardProps) {
   const config = contentTypeConfig[memory.content_type];
   const [ogImageError, setOgImageError] = useState(false);
 
+  // Long-press state for mobile
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const didLongPress = useRef(false);
+
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!onLongPress) return;
+      const touch = e.touches[0];
+      touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+      didLongPress.current = false;
+
+      longPressTimer.current = setTimeout(() => {
+        didLongPress.current = true;
+        onLongPress(touch.clientX, touch.clientY);
+        // Vibrate if supported
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, LONG_PRESS_DURATION);
+    },
+    [onLongPress]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStartPos.current) return;
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+      const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+      if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+        cancelLongPress();
+      }
+    },
+    [cancelLongPress]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    cancelLongPress();
+  }, [cancelLongPress]);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Prevent navigation if we just triggered a long press
+      if (didLongPress.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        didLongPress.current = false;
+      }
+    },
+    []
+  );
+
   return (
-    <div className="group relative animate-fade-in" onContextMenu={onContextMenu}>
+    <div
+      className="group relative animate-fade-in"
+      onContextMenu={onContextMenu}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <Link
         href={`/minnen/${memory.id}`}
+        onClick={handleClick}
         className={cn(
           "block rounded-2xl border border-border/60 bg-card overflow-hidden",
           `accent-line-top accent-line-${memory.content_type}`,
