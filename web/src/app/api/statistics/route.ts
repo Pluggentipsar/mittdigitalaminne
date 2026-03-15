@@ -10,7 +10,7 @@ export async function GET() {
     .select("*", { count: "exact", head: true });
 
   // Count per type
-  const types = ["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter"] as const;
+  const types = ["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter", "audio"] as const;
   const by_type: Record<string, number> = {};
   for (const type of types) {
     const { count } = await supabase
@@ -85,6 +85,18 @@ export async function GET() {
   });
   const activity = Object.entries(activityMap).map(([date, count]) => ({ date, count }));
 
+  // Unread feed items count
+  let unread_feed_count = 0;
+  try {
+    const { count: feedCount } = await supabase
+      .from("feed_items")
+      .select("*", { count: "exact", head: true })
+      .eq("is_read", false);
+    unread_feed_count = feedCount || 0;
+  } catch {
+    // feed_items table might not exist yet
+  }
+
   return NextResponse.json({
     data: {
       total: total || 0,
@@ -92,6 +104,7 @@ export async function GET() {
       favorites: favorites || 0,
       inbox_count: inbox_count || 0,
       reminders_due: reminders_due || 0,
+      unread_feed_count,
       by_type,
       top_tags,
       recent: recent || [],

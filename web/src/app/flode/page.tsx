@@ -1,0 +1,380 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { Rss, Settings2, Plus, RefreshCw, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useFeedItems, useFeeds } from "@/hooks/useFeeds";
+import { FeedItemCard } from "@/components/feeds/FeedItemCard";
+import { FeedFilterBar } from "@/components/feeds/FeedFilterBar";
+import { FeedDetailModal } from "@/components/feeds/FeedDetailModal";
+import { AddFeedModal } from "@/components/feeds/AddFeedModal";
+import type { FeedItem } from "@/lib/types";
+
+export default function FlodePage() {
+  const [activeType, setActiveType] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [sort, setSort] = useState<"newest" | "oldest" | "relevance" | "smart">("smart");
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { items, count, isLoading, mutate } = useFeedItems({
+    feed_type: activeType || undefined,
+    category: activeCategory || undefined,
+    unread_only: unreadOnly,
+    sort,
+    limit: 50,
+  });
+
+  const { sources, categories, mutate: mutateSources } = useFeeds();
+
+  const selectedItem =
+    selectedIndex !== null && items[selectedIndex] ? items[selectedIndex] : null;
+
+  const handleSave = useCallback(
+    async (itemId: string) => {
+      const res = await fetch(`/api/feeds/items/${itemId}/save`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        mutate();
+      }
+    },
+    [mutate]
+  );
+
+  const handleMarkRead = useCallback(
+    async (itemId: string) => {
+      await fetch(`/api/feeds/items/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_read: true }),
+      });
+      mutate();
+    },
+    [mutate]
+  );
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetch("/api/feeds/fetch");
+      mutate();
+      mutateSources();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [mutate, mutateSources]);
+
+  const handleFeedAdded = () => {
+    mutateSources();
+    mutate();
+  };
+
+  const handleItemClick = useCallback(
+    (item: FeedItem) => {
+      const idx = items.findIndex((i) => i.id === item.id);
+      setSelectedIndex(idx >= 0 ? idx : null);
+    },
+    [items]
+  );
+
+  const handlePrev = useCallback(() => {
+    setSelectedIndex((prev) => {
+      if (prev === null || prev <= 0) return prev;
+      return prev - 1;
+    });
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setSelectedIndex((prev) => {
+      if (prev === null || prev >= items.length - 1) return prev;
+      return prev + 1;
+    });
+  }, [items.length]);
+
+  const hasSources = sources.length > 0;
+
+  // Group YouTube items in a grid, others in a list
+  const youtubeItems = items.filter((i) => i.source?.feed_type === "youtube");
+  const otherItems = items.filter((i) => i.source?.feed_type !== "youtube");
+
+  // When filtering by type, don't split
+  const showMixed = !activeType;
+
+  return (
+    <div className="space-y-8">
+      {/* Hero header */}
+      <div className="animate-fade-in">
+        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
+          Flöde
+        </p>
+        <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
+          Ditt flöde
+        </h1>
+        <p className="text-[14px] text-muted-foreground/70 mt-2.5">
+          Nytt innehåll från dina källor, kurerat efter dina intressen.
+        </p>
+
+        <div className="divider-ornament mt-7 max-w-md">
+          <span className="text-primary/30 text-[8px]">&#9670;</span>
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div
+        className="flex flex-wrap items-center gap-3 animate-fade-in"
+        style={{ animationDelay: "0.05s" }}
+      >
+        <FeedFilterBar
+          activeType={activeType}
+          onTypeChange={setActiveType}
+          unreadOnly={unreadOnly}
+          onUnreadChange={setUnreadOnly}
+          sort={sort}
+          onSortChange={setSort}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          categories={categories}
+        />
+      </div>
+
+      {/* Action buttons — compact on mobile */}
+      <div
+        className="flex items-center gap-2 animate-fade-in"
+        style={{ animationDelay: "0.1s" }}
+      >
+        <button
+          onClick={() => setAddModalOpen(true)}
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary/90 transition-all shadow-xs"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          <span className="hidden sm:inline">Lägg till källa</span>
+          <span className="sm:hidden">Ny källa</span>
+        </button>
+
+        {/* Refresh button */}
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all disabled:opacity-50"
+          title="Hämta nytt innehåll"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            strokeWidth={1.5}
+          />
+          <span className="hidden sm:inline">
+            {refreshing ? "Uppdaterar..." : "Uppdatera"}
+          </span>
+        </button>
+
+        <Link
+          href="/flode/kallor"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all"
+          title="Hantera källor"
+        >
+          <Settings2 className="h-4 w-4" strokeWidth={1.5} />
+          <span className="hidden sm:inline">Hantera källor ({sources.length})</span>
+          <span className="sm:hidden">{sources.length}</span>
+        </Link>
+      </div>
+
+      {/* Feed items */}
+      {isLoading ? (
+        <div className="space-y-4">
+          {/* YouTube skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={`yt-${i}`}
+                className="rounded-2xl border border-border/60 bg-card overflow-hidden"
+              >
+                <div className="skeleton aspect-video" />
+                <div className="p-4 space-y-2">
+                  <div className="skeleton h-3 w-24 rounded-md" />
+                  <div className="skeleton h-4 w-3/4 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Article skeletons */}
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={`art-${i}`}
+              className="rounded-2xl border border-border/60 bg-card p-5"
+            >
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="skeleton h-3 w-24 rounded-md" />
+                  <div className="skeleton h-4 w-3/4 rounded-md" />
+                  <div className="skeleton h-3 w-full rounded-md" />
+                  <div className="skeleton h-3 w-2/3 rounded-md" />
+                </div>
+                <div className="skeleton w-36 h-24 rounded-xl shrink-0 hidden sm:block" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : !hasSources ? (
+        /* Empty state — no sources */
+        <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/8 flex items-center justify-center mb-5">
+            <Rss
+              className="h-7 w-7 text-amber-400/60"
+              strokeWidth={1.5}
+            />
+          </div>
+          <h3 className="heading-serif text-[20px] text-foreground/80 mb-2">
+            Inga källor ännu
+          </h3>
+          <p className="text-[13px] text-muted-foreground/50 max-w-sm mb-6">
+            Lägg till YouTube-kanaler, bloggar, poddar eller nyhetsbrev
+            för att få ett kurerat flöde av innehåll.
+          </p>
+          <button
+            onClick={() => setAddModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary/90 transition-all"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2} />
+            Lägg till din första källa
+          </button>
+        </div>
+      ) : items.length === 0 ? (
+        /* Empty state — no items matching filter */
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mb-4">
+            <Rss
+              className="h-6 w-6 text-muted-foreground/30"
+              strokeWidth={1.5}
+            />
+          </div>
+          <h3 className="heading-serif text-[18px] text-foreground/70 mb-1.5">
+            {unreadOnly ? "Inga olästa objekt" : "Inga objekt att visa"}
+          </h3>
+          <p className="text-[13px] text-muted-foreground/40 max-w-xs">
+            {unreadOnly
+              ? "Du har läst allt! Prova att visa alla objekt."
+              : "Nytt innehåll dyker upp här när dina källor uppdateras."}
+          </p>
+        </div>
+      ) : (
+        <div
+          className="space-y-6 animate-fade-in"
+          style={{ animationDelay: "0.15s" }}
+        >
+          {/* Count */}
+          <p className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-[0.12em]">
+            {count} {count === 1 ? "objekt" : "objekt"}
+            {unreadOnly ? " (olästa)" : ""}
+            {activeCategory ? ` i "${activeCategory}"` : ""}
+          </p>
+
+          {/* Mixed view: YouTube grid + other items list */}
+          {showMixed && youtubeItems.length > 0 && (
+            <>
+              {/* YouTube section */}
+              <div>
+                <p className="text-[11px] font-semibold text-red-500/50 uppercase tracking-[0.12em] mb-3 flex items-center gap-1.5">
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" />
+                    <path d="M9.545 15.568V8.432L15.818 12z" fill="white" />
+                  </svg>
+                  YouTube
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {youtubeItems.map((item) => (
+                    <FeedItemCard
+                      key={item.id}
+                      item={item}
+                      onSave={handleSave}
+                      onMarkRead={handleMarkRead}
+                      onClick={handleItemClick}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Divider if there are also other items */}
+              {otherItems.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent to-border/40" />
+                  <span className="text-primary/20 text-[8px]">&#9670;</span>
+                  <span className="h-px flex-1 bg-gradient-to-l from-transparent to-border/40" />
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Other items list (non-YouTube in mixed, or everything when type-filtered) */}
+          {showMixed && otherItems.length > 0 && (
+            <div className="space-y-3">
+              {otherItems.map((item) => (
+                <FeedItemCard
+                  key={item.id}
+                  item={item}
+                  onSave={handleSave}
+                  onMarkRead={handleMarkRead}
+                  onClick={handleItemClick}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Type-filtered view: YouTube gets grid, others get list */}
+          {activeType === "youtube" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {items.map((item) => (
+                <FeedItemCard
+                  key={item.id}
+                  item={item}
+                  onSave={handleSave}
+                  onMarkRead={handleMarkRead}
+                  onClick={handleItemClick}
+                />
+              ))}
+            </div>
+          )}
+
+          {activeType && activeType !== "youtube" && (
+            <div className="space-y-3">
+              {items.map((item) => (
+                <FeedItemCard
+                  key={item.id}
+                  item={item}
+                  onSave={handleSave}
+                  onMarkRead={handleMarkRead}
+                  onClick={handleItemClick}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Feed Detail Modal */}
+      <FeedDetailModal
+        open={selectedIndex !== null}
+        item={selectedItem}
+        onClose={() => setSelectedIndex(null)}
+        onSave={handleSave}
+        onMarkRead={handleMarkRead}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        hasPrev={selectedIndex !== null && selectedIndex > 0}
+        hasNext={
+          selectedIndex !== null && selectedIndex < items.length - 1
+        }
+      />
+
+      {/* Add Feed Modal */}
+      <AddFeedModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onAdded={handleFeedAdded}
+        existingCategories={categories}
+      />
+    </div>
+  );
+}

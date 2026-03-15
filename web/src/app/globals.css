@@ -25,6 +25,7 @@
   --color-type-linkedin: var(--type-linkedin);
   --color-type-instagram: var(--type-instagram);
   --color-type-twitter: var(--type-twitter);
+  --color-type-audio: var(--type-audio);
   --font-sans: var(--font-body);
   --font-serif: var(--font-display);
 }
@@ -57,6 +58,7 @@
   --type-linkedin: #0a66c2;
   --type-instagram: #db2777;
   --type-twitter: #1d9bf0;
+  --type-audio: #1db954;
 
   --destructive: #dc2626;
 
@@ -264,6 +266,7 @@ body::before {
 .badge-type-linkedin { background: rgba(10, 102, 194, 0.08); color: #0858a1; }
 .badge-type-instagram { background: rgba(219, 39, 119, 0.08); color: #be185d; }
 .badge-type-twitter { background: rgba(29, 155, 240, 0.08); color: #1a8cd8; }
+.badge-type-audio { background: rgba(29, 185, 84, 0.08); color: #1db954; }
 
 /* === Dark mode badge overrides === */
 .dark .badge-type-image { background: rgba(217, 119, 6, 0.15); color: #f59e0b; }
@@ -274,6 +277,7 @@ body::before {
 .dark .badge-type-linkedin { background: rgba(10, 102, 194, 0.18); color: #60a5fa; }
 .dark .badge-type-instagram { background: rgba(219, 39, 119, 0.18); color: #f472b6; }
 .dark .badge-type-twitter { background: rgba(29, 155, 240, 0.18); color: #7dd3fc; }
+.dark .badge-type-audio { background: rgba(29, 185, 84, 0.18); color: #4ade80; }
 
 /* Dark mode skeleton */
 .dark .skeleton {
@@ -319,6 +323,7 @@ body::before {
 .card-glow-linkedin { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 .card-glow-instagram { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 .card-glow-twitter { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.card-glow-audio { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 
 .card-glow-image:hover { box-shadow: 0 8px 24px rgba(217, 119, 6, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-link:hover { box-shadow: 0 8px 24px rgba(3, 105, 161, 0.10), var(--shadow-sm); transform: translateY(-3px); }
@@ -328,6 +333,7 @@ body::before {
 .card-glow-linkedin:hover { box-shadow: 0 8px 24px rgba(10, 102, 194, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-instagram:hover { box-shadow: 0 8px 24px rgba(219, 39, 119, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-twitter:hover { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.10), var(--shadow-sm); transform: translateY(-3px); }
+.card-glow-audio:hover { box-shadow: 0 8px 24px rgba(29, 185, 84, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 
 /* Dark mode card glow — more intense for dark backgrounds */
 .dark .card-glow-image:hover { box-shadow: 0 8px 24px rgba(217, 119, 6, 0.18), var(--shadow-sm); }
@@ -338,6 +344,7 @@ body::before {
 .dark .card-glow-linkedin:hover { box-shadow: 0 8px 24px rgba(10, 102, 194, 0.18), var(--shadow-sm); }
 .dark .card-glow-instagram:hover { box-shadow: 0 8px 24px rgba(219, 39, 119, 0.18), var(--shadow-sm); }
 .dark .card-glow-twitter:hover { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.18), var(--shadow-sm); }
+.dark .card-glow-audio:hover { box-shadow: 0 8px 24px rgba(29, 185, 84, 0.18), var(--shadow-sm); }
 
 /* === Accent top line on cards === */
 .accent-line-top {
@@ -367,6 +374,7 @@ body::before {
 .accent-line-linkedin::before { background: linear-gradient(90deg, #0a66c2, #38bdf8); }
 .accent-line-instagram::before { background: linear-gradient(90deg, #db2777, #f472b6); }
 .accent-line-twitter::before { background: linear-gradient(90deg, #1d9bf0, #60c5f7); }
+.accent-line-audio::before { background: linear-gradient(90deg, #1db954, #4ade80); }
 
 /* === Ambient orb === */
 .ambient-orb {

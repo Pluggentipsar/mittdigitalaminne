@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
   const { tags: tagNames, ...memoryData } = body;
 
   // Create memory — allow source override from extension/import
-  const validSources = ["web", "mcp", "manual", "import", "extension"];
+  const validSources = ["web", "mcp", "manual", "import", "extension", "feed"];
   const source = validSources.includes(memoryData.source) ? memoryData.source : "web";
   const { data: memory, error } = await supabase
     .from("memories")

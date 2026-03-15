@@ -59,7 +59,7 @@ export default function DashboardPage() {
         </div>
         <div className="lg:col-span-2">
           <TypeDistribution
-            by_type={stats?.by_type || { image: 0, link: 0, article: 0, thought: 0, youtube: 0, linkedin: 0, instagram: 0, twitter: 0 }}
+            by_type={stats?.by_type || { image: 0, link: 0, article: 0, thought: 0, youtube: 0, linkedin: 0, instagram: 0, twitter: 0, audio: 0 }}
             total={stats?.total || 0}
           />
         </div>

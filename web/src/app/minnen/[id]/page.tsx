@@ -21,6 +21,7 @@ import {
   Bell,
   BellOff,
   Share2,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemory } from "@/hooks/useMemories";
@@ -36,6 +37,8 @@ import { YouTubePreview } from "@/components/memories/previews/YouTubePreview";
 import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
 import { InstagramEmbed } from "@/components/memories/previews/InstagramEmbed";
+import { AudioPreview } from "@/components/memories/previews/AudioPreview";
+import { ReaderMode } from "@/components/ui/ReaderMode";
 import { contentTypeConfig, cn } from "@/lib/utils";
 import { downloadAsText, downloadAsDocx } from "@/lib/export";
 import { format } from "date-fns";
@@ -56,6 +59,23 @@ export default function MemoryDetailPage({
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [reminderMenuOpen, setReminderMenuOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [refetching, setRefetching] = useState(false);
+  const [readerOpen, setReaderOpen] = useState(false);
+
+  const handleRefetch = async () => {
+    if (!memory?.link_url) return;
+    setRefetching(true);
+    try {
+      const res = await fetch(`/api/memories/${id}/refetch`, { method: "POST" });
+      if (res.ok) {
+        mutate();
+      }
+    } catch {
+      // ignore
+    } finally {
+      setRefetching(false);
+    }
+  };
 
   const fetchMemoryProjects = useCallback(async () => {
     try {
@@ -266,6 +286,17 @@ export default function MemoryDetailPage({
           >
             <Wand2 className="h-[17px] w-[17px]" strokeWidth={1.5} />
           </button>
+          {/* Re-fetch article content */}
+          {memory.link_url && ["article", "link"].includes(memory.content_type) && (
+            <button
+              onClick={handleRefetch}
+              disabled={refetching}
+              className="p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-muted-foreground/50 hover:text-emerald-600 transition-all disabled:opacity-40"
+              title="Hämta om artikelinnehåll"
+            >
+              <RefreshCw className={cn("h-[17px] w-[17px]", refetching && "animate-spin")} strokeWidth={1.5} />
+            </button>
+          )}
           {/* Export dropdown */}
           {(memory.original_content || memory.summary) && (
             <div className="relative">
@@ -397,13 +428,18 @@ export default function MemoryDetailPage({
         <SocialPreview type="twitter" linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
 
+      {/* Audio/Podcast embed */}
+      {memory.content_type === "audio" && memory.link_url && (
+        <AudioPreview linkUrl={memory.link_url} metadata={memory.link_metadata} embed />
+      )}
+
       {/* Link preview */}
       {memory.content_type === "link" && memory.link_url && memory.link_metadata?.og_image && (
         <LinkPreview linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
 
       {/* Fallback link */}
-      {memory.link_url && !["youtube", "linkedin", "instagram", "twitter"].includes(memory.content_type) && !(memory.content_type === "link" && memory.link_metadata?.og_image) && (
+      {memory.link_url && !["youtube", "linkedin", "instagram", "twitter", "audio"].includes(memory.content_type) && !(memory.content_type === "link" && memory.link_metadata?.og_image) && (
         <a
           href={memory.link_url}
           target="_blank"
@@ -437,9 +473,18 @@ export default function MemoryDetailPage({
       {/* Original content */}
       {memory.original_content && (
         <div className="rounded-2xl border border-border/50 bg-card p-7 shadow-xs">
-          <h2 className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.12em] mb-4">
-            Innehåll
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.12em]">
+              Innehåll
+            </h2>
+            <button
+              onClick={() => setReaderOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-primary hover:bg-primary/8 transition-all"
+            >
+              <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Läsläge
+            </button>
+          </div>
           <MarkdownContent content={memory.original_content} />
         </div>
       )}
@@ -546,6 +591,23 @@ export default function MemoryDetailPage({
         open={shareDialogOpen}
         onClose={() => setShareDialogOpen(false)}
       />
+
+      {/* Reader Mode */}
+      {memory.original_content && (
+        <ReaderMode
+          open={readerOpen}
+          onClose={() => setReaderOpen(false)}
+          title={memory.title}
+          content={memory.original_content}
+          author={memory.link_metadata?.author_name}
+          domain={memory.link_metadata?.domain}
+          readTime={
+            memory.original_content.length > 200
+              ? Math.max(1, Math.round(memory.original_content.split(/\s+/).length / 200))
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 }

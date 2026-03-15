@@ -1,4 +1,6 @@
-export type ContentType = "image" | "link" | "article" | "thought" | "youtube" | "linkedin" | "instagram" | "twitter";
+export type ContentType = "image" | "link" | "article" | "thought" | "youtube" | "linkedin" | "instagram" | "twitter" | "audio";
+
+export type FeedType = "rss" | "youtube" | "podcast" | "newsletter";
 
 export interface Memory {
   id: string;
@@ -10,7 +12,7 @@ export interface Memory {
   image_storage_path: string | null;
   link_url: string | null;
   link_metadata: LinkMetadata | null;
-  source: "mcp" | "web" | "manual" | "import" | "extension";
+  source: "mcp" | "web" | "manual" | "import" | "extension" | "feed";
   is_favorite: boolean;
   is_inbox: boolean;
   snapshot_html: string | null;
@@ -39,6 +41,9 @@ export interface LinkMetadata {
   channel_name?: string;
   thumbnail_url?: string;
   author_name?: string;
+  spotify_uri?: string;
+  podcast_name?: string;
+  episode_name?: string;
 }
 
 export interface MemoryWithTags extends Memory {
@@ -114,4 +119,43 @@ export interface MemoryStats {
   recent: { id: string; title: string; content_type: ContentType; created_at: string }[];
   reminders: { id: string; title: string; content_type: ContentType; remind_at: string }[];
   activity: { date: string; count: number }[];
+  unread_feed_count?: number;
+}
+
+export interface FeedSource {
+  id: string;
+  name: string;
+  feed_url: string;
+  site_url: string | null;
+  feed_type: FeedType;
+  icon_url: string | null;
+  color: string;
+  category: string | null;
+  is_active: boolean;
+  fetch_interval_minutes: number;
+  last_fetched_at: string | null;
+  last_error: string | null;
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeedItem {
+  id: string;
+  source_id: string;
+  guid: string;
+  title: string;
+  summary: string | null;
+  content_html: string | null;
+  link_url: string | null;
+  image_url: string | null;
+  author: string | null;
+  published_at: string | null;
+  fetched_at: string;
+  is_read: boolean;
+  is_saved: boolean;
+  saved_memory_id: string | null;
+  relevance_score: number;
+  metadata: Record<string, unknown> | null;
+  source?: FeedSource;
 }
