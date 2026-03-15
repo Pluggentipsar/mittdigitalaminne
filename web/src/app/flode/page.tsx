@@ -140,31 +140,31 @@ export default function FlodePage() {
         />
       </div>
 
-      {/* Action buttons — compact on mobile */}
+      {/* Action buttons */}
       <div
         className="flex items-center gap-2 animate-fade-in"
         style={{ animationDelay: "0.1s" }}
       >
         <button
           onClick={() => setAddModalOpen(true)}
-          className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary/90 transition-all shadow-xs"
+          className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary/90 transition-all shadow-xs whitespace-nowrap"
         >
-          <Plus className="h-4 w-4" strokeWidth={2} />
+          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
           <span className="hidden sm:inline">Lägg till källa</span>
           <span className="sm:hidden">Ny källa</span>
         </button>
 
-        {/* Refresh button */}
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all disabled:opacity-50 whitespace-nowrap"
           title="Hämta nytt innehåll"
         >
           <RefreshCw
-            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
             strokeWidth={1.5}
           />
+          <span className="sm:hidden">{refreshing ? "..." : "Uppdatera"}</span>
           <span className="hidden sm:inline">
             {refreshing ? "Uppdaterar..." : "Uppdatera"}
           </span>
@@ -172,12 +172,11 @@ export default function FlodePage() {
 
         <Link
           href="/flode/kallor"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all"
+          className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all whitespace-nowrap"
           title="Hantera källor"
         >
-          <Settings2 className="h-4 w-4" strokeWidth={1.5} />
-          <span className="hidden sm:inline">Hantera källor ({sources.length})</span>
-          <span className="sm:hidden">{sources.length}</span>
+          <Settings2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <span>Källor ({sources.length})</span>
         </Link>
       </div>
 
