@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { parseFeed, youtubeVideoThumbnail, resolveSpotifyShow, isSpotifyUrl } from "@/lib/feed-parser";
 import { scoreFeedItems } from "@/lib/feed-scoring";
+import { autoTagItems } from "@/lib/feed-auto-tagger";
 
 /**
  * GET /api/feeds/fetch — Cron endpoint to fetch new feed items
@@ -139,6 +140,37 @@ export async function GET(req: NextRequest) {
     }
   } catch {
     // Scoring failure is non-critical
+  }
+
+  // Auto-tag items that don't have tags yet
+  try {
+    const { data: allTags } = await supabase
+      .from("tags")
+      .select("name");
+
+    const tagNames = (allTags || []).map((t: any) => t.name);
+
+    if (tagNames.length > 0) {
+      const { data: untaggedItems } = await supabase
+        .from("feed_items")
+        .select("id, title, summary")
+        .or("tags.is.null,tags.eq.{}")
+        .limit(200);
+
+      if (untaggedItems && untaggedItems.length > 0) {
+        const tagMap = autoTagItems(untaggedItems, tagNames);
+        for (const [itemId, tags] of tagMap) {
+          if (tags.length > 0) {
+            await supabase
+              .from("feed_items")
+              .update({ tags })
+              .eq("id", itemId);
+          }
+        }
+      }
+    }
+  } catch {
+    // Tagging failure is non-critical
   }
 
   // Cleanup: delete old unsaved items (>30 days)

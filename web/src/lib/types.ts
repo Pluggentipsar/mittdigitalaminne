@@ -156,6 +156,7 @@ export interface FeedItem {
   is_saved: boolean;
   saved_memory_id: string | null;
   relevance_score: number;
+  tags: string[] | null;
   metadata: Record<string, unknown> | null;
   source?: FeedSource;
 }

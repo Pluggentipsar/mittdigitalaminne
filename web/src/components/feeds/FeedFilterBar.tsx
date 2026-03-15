@@ -8,6 +8,7 @@ import {
   SlidersHorizontal,
   FileText,
   Hash,
+  Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,9 @@ interface FeedFilterBarProps {
   activeCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   categories: string[];
+  activeTag: string | null;
+  onTagChange: (tag: string | null) => void;
+  availableTags: string[];
 }
 
 const typeFilters = [
@@ -41,6 +45,9 @@ export function FeedFilterBar({
   activeCategory,
   onCategoryChange,
   categories,
+  activeTag,
+  onTagChange,
+  availableTags,
 }: FeedFilterBarProps) {
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -133,6 +140,40 @@ export function FeedFilterBar({
               )}
             >
               {cat}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Row 3: Tag pills (from auto-tagged content) */}
+      {availableTags.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 -mb-0.5">
+          <Tag
+            className="h-3 w-3 text-muted-foreground/30 shrink-0"
+            strokeWidth={2}
+          />
+          <button
+            onClick={() => onTagChange(null)}
+            className={cn(
+              "shrink-0 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all",
+              activeTag === null
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground/40 hover:text-foreground hover:bg-accent"
+            )}
+          >
+            Alla taggar
+          </button>
+          {availableTags.map((t) => (
+            <button
+              key={t}
+              onClick={() => onTagChange(activeTag === t ? null : t)}
+              className={cn(
+                "shrink-0 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all capitalize",
+                activeTag === t
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground/40 hover:text-foreground hover:bg-accent"
+              )}
+            >
+              {t}
             </button>
           ))}
         </div>

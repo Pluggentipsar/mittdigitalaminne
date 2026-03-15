@@ -435,6 +435,20 @@ function ArticleCard({
             </p>
           )}
 
+          {/* Tags */}
+          {item.tags && item.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {item.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 rounded-md bg-primary/6 text-primary/70 text-[10px] font-semibold capitalize"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex items-center gap-1.5">
             {!item.is_saved ? (

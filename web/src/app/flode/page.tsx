@@ -13,15 +13,17 @@ import type { FeedItem } from "@/lib/types";
 export default function FlodePage() {
   const [activeType, setActiveType] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [sort, setSort] = useState<"newest" | "oldest" | "relevance" | "smart">("smart");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { items, count, isLoading, mutate } = useFeedItems({
+  const { items, count, availableTags, isLoading, mutate } = useFeedItems({
     feed_type: activeType || undefined,
     category: activeCategory || undefined,
+    tag: activeTag || undefined,
     unread_only: unreadOnly,
     sort,
     limit: 50,
@@ -142,6 +144,9 @@ export default function FlodePage() {
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
           categories={categories}
+          activeTag={activeTag}
+          onTagChange={setActiveTag}
+          availableTags={availableTags}
         />
       </div>
 

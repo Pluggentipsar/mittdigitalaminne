@@ -3,7 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/feeds/items — List feed items across all sources
- * Query params: source_id, feed_type, category, unread_only, sort (newest|oldest|relevance|smart), limit, offset
+ * Query params: source_id, feed_type, category, tag, unread_only, sort (newest|oldest|relevance|smart), limit, offset
  */
 export async function GET(req: NextRequest) {
   const supabase = createServerClient();
@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   const source_id = searchParams.get("source_id");
   const feed_type = searchParams.get("feed_type");
   const category = searchParams.get("category");
+  const tag = searchParams.get("tag");
   const unread_only = searchParams.get("unread_only") === "true";
   const sort = searchParams.get("sort") || "newest";
   const limit = parseInt(searchParams.get("limit") || "30");
@@ -23,6 +24,11 @@ export async function GET(req: NextRequest) {
 
   if (source_id) {
     query = query.eq("source_id", source_id);
+  }
+
+  // Filter by tag using Postgres array containment
+  if (tag) {
+    query = query.contains("tags", [tag]);
   }
 
   if (unread_only) {
@@ -43,7 +49,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch extra items for client-side filtering + smart interleaving
-  const needsClientFilter = !!(feed_type || category);
+  const needsClientFilter = !!(feed_type || category || tag);
   const fetchLimit = needsClientFilter || sort === "smart" ? limit * 3 : limit;
   query = query.range(offset, offset + fetchLimit - 1);
 
@@ -81,7 +87,19 @@ export async function GET(req: NextRequest) {
   const finalItems = items.slice(0, limit);
   const finalCount = needsClientFilter ? items.length : (count || 0);
 
-  return NextResponse.json({ data: finalItems, count: finalCount });
+  // Collect unique tags across all fetched items (before limit) for filter UI
+  const allTags = new Set<string>();
+  for (const item of items) {
+    if (item.tags && Array.isArray(item.tags)) {
+      for (const t of item.tags) allTags.add(t);
+    }
+  }
+
+  return NextResponse.json({
+    data: finalItems,
+    count: finalCount,
+    available_tags: Array.from(allTags).sort(),
+  });
 }
 
 /**
