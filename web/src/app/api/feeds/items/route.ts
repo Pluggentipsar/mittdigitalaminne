@@ -71,9 +71,10 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // Smart sort: interleave items from different sources
+  // Smart sort: compute source save rates, then interleave
   if (sort === "smart") {
-    items = smartInterleave(items);
+    const saveRates = await getSourceSaveRates(supabase);
+    items = smartInterleave(items, saveRates);
   }
 
   // Apply final limit
@@ -81,6 +82,39 @@ export async function GET(req: NextRequest) {
   const finalCount = needsClientFilter ? items.length : (count || 0);
 
   return NextResponse.json({ data: finalItems, count: finalCount });
+}
+
+/**
+ * Calculate save rate per source: saved_count / total_count.
+ * Sources where the user saves more get a higher boost.
+ * Returns a map of source_id → save rate (0–1).
+ */
+async function getSourceSaveRates(supabase: any): Promise<Map<string, number>> {
+  const rates = new Map<string, number>();
+
+  const { data } = await supabase
+    .from("feed_items")
+    .select("source_id, is_saved");
+
+  if (!data || data.length === 0) return rates;
+
+  // Aggregate per source
+  const stats = new Map<string, { total: number; saved: number }>();
+  for (const item of data) {
+    const s = stats.get(item.source_id) || { total: 0, saved: 0 };
+    s.total++;
+    if (item.is_saved) s.saved++;
+    stats.set(item.source_id, s);
+  }
+
+  for (const [sourceId, { total, saved }] of stats) {
+    // Require at least 3 items to avoid noisy rates
+    if (total >= 3) {
+      rates.set(sourceId, saved / total);
+    }
+  }
+
+  return rates;
 }
 
 /**
@@ -97,13 +131,11 @@ function recencyScore(dateStr: string | null): number {
 
 /**
  * Smart sort: ranks items by a combined score of relevance, recency,
- * and unread status, then interleaves to ensure source diversity.
+ * unread status, and source engagement, then interleaves for diversity.
  *
- * Score = relevance * 0.35 + recency * 0.40 + unread * 0.25
- * After scoring, items are picked greedily with a diversity penalty
- * for consecutive items from the same source.
+ * Score = relevance * 0.30 + recency * 0.35 + unread * 0.20 + sourceEngagement * 0.15
  */
-function smartInterleave(items: any[]): any[] {
+function smartInterleave(items: any[], saveRates: Map<string, number>): any[] {
   if (items.length <= 1) return items;
 
   // Score each item
@@ -111,8 +143,13 @@ function smartInterleave(items: any[]): any[] {
     const relevance = item.relevance_score || 0;
     const recency = recencyScore(item.published_at || item.fetched_at);
     const unreadBonus = item.is_read ? 0 : 1;
+    const sourceEngagement = saveRates.get(item.source_id) || 0;
 
-    const score = relevance * 0.35 + recency * 0.40 + unreadBonus * 0.25;
+    const score =
+      relevance * 0.30 +
+      recency * 0.35 +
+      unreadBonus * 0.20 +
+      sourceEngagement * 0.15;
 
     return { item, score };
   });
