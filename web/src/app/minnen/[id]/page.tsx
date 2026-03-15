@@ -163,6 +163,13 @@ export default function MemoryDetailPage({
             />
           </button>
           <button
+            onClick={() => setProjectDialogOpen(true)}
+            className="p-2.5 rounded-xl hover:bg-accent text-muted-foreground/50 hover:text-foreground transition-all"
+            title="Lägg till i projekt"
+          >
+            <FolderPlus className="h-[17px] w-[17px]" strokeWidth={1.5} />
+          </button>
+          <button
             onClick={() => setAiPanelOpen(true)}
             className="p-2.5 rounded-xl hover:bg-amber-50 text-muted-foreground/50 hover:text-amber-600 transition-all"
             title="Bearbeta med AI"

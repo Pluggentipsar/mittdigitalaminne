@@ -61,6 +61,8 @@ export function CardContextMenu({
   }, [x, y]);
 
   // Close on click/touch outside or Escape
+  // Delay adding touch listener to avoid immediate close from the same
+  // touch event that triggered the long-press opening
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -75,10 +77,18 @@ export function CardContextMenu({
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
+
     document.addEventListener("mousedown", handleClick);
-    document.addEventListener("touchstart", handleTouch);
     document.addEventListener("keydown", handleKeyDown);
+
+    // Small delay before listening for touch events — prevents the
+    // opening long-press touchend from immediately closing the menu
+    const touchTimer = setTimeout(() => {
+      document.addEventListener("touchstart", handleTouch);
+    }, 100);
+
     return () => {
+      clearTimeout(touchTimer);
       document.removeEventListener("mousedown", handleClick);
       document.removeEventListener("touchstart", handleTouch);
       document.removeEventListener("keydown", handleKeyDown);
@@ -139,26 +149,30 @@ export function CardContextMenu({
       </button>
 
       {/* Lägg till i projekt */}
-      <div
-        className="relative"
-        onMouseEnter={() => setShowProjects(true)}
-        onMouseLeave={() => setShowProjects(false)}
-      >
-        <button className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors">
+      <div>
+        <button
+          onClick={() => setShowProjects(!showProjects)}
+          className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+        >
           <FolderPlus className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
           Lägg till i projekt
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto" />
+          <ChevronRight
+            className={cn(
+              "h-3.5 w-3.5 text-muted-foreground/30 ml-auto transition-transform duration-200",
+              showProjects && "rotate-90"
+            )}
+          />
         </button>
 
-        {/* Project submenu */}
+        {/* Inline project list */}
         {showProjects && activeProjects.length > 0 && (
-          <div className="absolute left-full top-0 ml-1 min-w-[180px] bg-card rounded-xl border border-border/60 shadow-lg py-1.5 animate-fade">
+          <div className="py-1 animate-fade">
             {activeProjects.map((project) => (
               <button
                 key={project.id}
                 onClick={() => handleAddToProject(project.id)}
                 disabled={addingToProject === project.id}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-left text-[12px] font-medium hover:bg-accent/70 transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-2.5 pl-10 pr-3.5 py-2 text-left text-[12px] font-medium hover:bg-accent/70 transition-colors disabled:opacity-50"
               >
                 <span
                   className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -177,7 +191,7 @@ export function CardContextMenu({
         )}
 
         {showProjects && activeProjects.length === 0 && (
-          <div className="absolute left-full top-0 ml-1 min-w-[160px] bg-card rounded-xl border border-border/60 shadow-lg py-3 px-3.5 animate-fade">
+          <div className="py-2 pl-10 pr-3.5 animate-fade">
             <p className="text-[11px] text-muted-foreground/50">Inga projekt ännu</p>
           </div>
         )}
