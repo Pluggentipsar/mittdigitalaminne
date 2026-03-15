@@ -165,6 +165,26 @@ export function FeedDetailModal({
     }
   }, [open, item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Mobile back button: push a history entry so pressing back closes the modal
+  useEffect(() => {
+    if (!open) return;
+    const hasState = window.history.state?.feedModal;
+    if (!hasState) {
+      window.history.pushState({ feedModal: true }, "");
+    }
+    const handlePopState = () => {
+      onClose();
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      // Clean up the extra history entry if modal is closed programmatically
+      if (window.history.state?.feedModal) {
+        window.history.back();
+      }
+    };
+  }, [open, onClose]);
+
   // Keyboard navigation
   useEffect(() => {
     if (!open) return;

@@ -40,6 +40,7 @@ export function useFeedItems(filters: {
   feed_type?: string;
   category?: string;
   tag?: string;
+  q?: string;
   unread_only?: boolean;
   sort?: "newest" | "oldest" | "relevance" | "smart";
   limit?: number;
@@ -50,6 +51,7 @@ export function useFeedItems(filters: {
   if (filters.feed_type) params.set("feed_type", filters.feed_type);
   if (filters.category) params.set("category", filters.category);
   if (filters.tag) params.set("tag", filters.tag);
+  if (filters.q) params.set("q", filters.q);
   if (filters.unread_only) params.set("unread_only", "true");
   if (filters.sort) params.set("sort", filters.sort);
   if (filters.limit) params.set("limit", String(filters.limit));

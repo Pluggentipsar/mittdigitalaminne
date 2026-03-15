@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Rss, Settings2, Plus, RefreshCw, Loader2 } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Rss, Settings2, Plus, RefreshCw, Loader2, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useFeedItems, useFeeds } from "@/hooks/useFeeds";
 import { FeedItemCard } from "@/components/feeds/FeedItemCard";
@@ -19,11 +19,24 @@ export default function FlodePage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Debounce search input
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setSearchQuery(searchInput.trim());
+    }, 300);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [searchInput]);
 
   const { items, count, availableTags, isLoading, mutate } = useFeedItems({
     feed_type: activeType || undefined,
     category: activeCategory || undefined,
     tag: activeTag || undefined,
+    q: searchQuery || undefined,
     unread_only: unreadOnly,
     sort,
     limit: 50,
@@ -146,10 +159,35 @@ export default function FlodePage() {
         />
       </div>
 
-      {/* Action buttons — compact row */}
+      {/* Search + action buttons */}
       <div
         className="flex items-center gap-1.5 animate-fade-in"
         style={{ animationDelay: "0.1s" }}
+      >
+        {/* Search input */}
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/35" strokeWidth={2} />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Sök i flödet..."
+            className="w-full h-7 pl-7 pr-7 rounded-full border border-border/40 bg-transparent text-[11px] text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:border-primary/40 transition-colors"
+          />
+          {searchInput && (
+            <button
+              onClick={() => setSearchInput("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground"
+            >
+              <X className="h-3 w-3" strokeWidth={2} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Action buttons — compact row */}
+      <div
+        className="flex items-center gap-1.5 animate-fade-in"
       >
         <button
           onClick={() => setAddModalOpen(true)}

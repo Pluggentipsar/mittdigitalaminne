@@ -89,7 +89,7 @@ export function ReaderMode({ open, onClose, title, content, author, domain, read
         "fixed inset-0 z-[9999] flex flex-col bg-background transition-opacity duration-300",
         visible ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
-      style={{ height: "100dvh" }}
+      style={{ width: "100vw", height: "100dvh", top: 0, left: 0 }}
     >
       {/* Top bar — sticky, not absolute */}
       <div
@@ -98,7 +98,7 @@ export function ReaderMode({ open, onClose, title, content, author, domain, read
           visible ? "translate-y-0" : "-translate-y-full"
         )}
       >
-        <div className="max-w-[720px] mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-[720px] mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BookOpen className="h-4 w-4 text-primary/60" strokeWidth={1.5} />
             <span className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.08em]">

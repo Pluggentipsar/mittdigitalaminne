@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const feed_type = searchParams.get("feed_type");
   const category = searchParams.get("category");
   const tag = searchParams.get("tag");
+  const search = searchParams.get("q");
   const unread_only = searchParams.get("unread_only") === "true";
   const sort = searchParams.get("sort") || "newest";
   const limit = parseInt(searchParams.get("limit") || "30");
@@ -35,6 +36,11 @@ export async function GET(req: NextRequest) {
     query = query.eq("is_read", false);
   }
 
+  // Text search: match title or summary (case-insensitive via ilike)
+  if (search) {
+    query = query.or(`title.ilike.%${search}%,summary.ilike.%${search}%`);
+  }
+
   // Sorting
   if (sort === "oldest") {
     query = query.order("fetched_at", { ascending: true });
@@ -49,7 +55,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch extra items for client-side filtering + smart interleaving
-  const needsClientFilter = !!(feed_type || category || tag);
+  const needsClientFilter = !!(feed_type || category || tag || search);
   const fetchLimit = needsClientFilter || sort === "smart" ? limit * 3 : limit;
   query = query.range(offset, offset + fetchLimit - 1);
 

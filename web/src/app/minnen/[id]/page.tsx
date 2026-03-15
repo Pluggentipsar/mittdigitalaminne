@@ -156,7 +156,7 @@ export default function MemoryDetailPage({
   const config = contentTypeConfig[memory.content_type];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in overflow-x-hidden">
       {/* Back + actions */}
       <div className="flex items-center justify-between">
         <Link
@@ -166,7 +166,7 @@ export default function MemoryDetailPage({
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Tillbaka
         </Link>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
           <Link
             href={`/minnen/${id}/redigera`}
             className="p-2.5 rounded-xl hover:bg-accent text-muted-foreground/50 hover:text-foreground transition-all"
