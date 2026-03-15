@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Star, Trash2, ExternalLink, Play } from "lucide-react";
+import { Star, Trash2, ExternalLink, Play, Check } from "lucide-react";
 import type { Memory } from "@/lib/types";
 import { cn, relativeDate, contentTypeConfig } from "@/lib/utils";
 import { ContentTypeIcon } from "./ContentTypeIcon";
@@ -11,6 +11,9 @@ interface MemoryCardProps {
   memory: Memory;
   index?: number;
   isFocused?: boolean;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
   onToggleFavorite?: (id: string, current: boolean) => void;
   onDelete?: (id: string) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -20,7 +23,7 @@ interface MemoryCardProps {
 const LONG_PRESS_DURATION = 500;
 const MOVE_THRESHOLD = 10;
 
-export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelete, onContextMenu, onLongPress }: MemoryCardProps) {
+export function MemoryCard({ memory, index, isFocused, selectionMode, isSelected, onToggleSelect, onToggleFavorite, onDelete, onContextMenu, onLongPress }: MemoryCardProps) {
   const config = contentTypeConfig[memory.content_type];
   const [ogImageError, setOgImageError] = useState(false);
 
@@ -38,6 +41,7 @@ export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelet
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
+      if (selectionMode) return; // Don't do long-press in selection mode
       if (!onLongPress) return;
       const touch = e.touches[0];
       touchStartPos.current = { x: touch.clientX, y: touch.clientY };
@@ -50,7 +54,7 @@ export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelet
         if (navigator.vibrate) navigator.vibrate(30);
       }, LONG_PRESS_DURATION);
     },
-    [onLongPress]
+    [onLongPress, selectionMode]
   );
 
   const handleTouchMove = useCallback(
@@ -72,6 +76,13 @@ export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelet
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      // In selection mode, click toggles selection instead of navigating
+      if (selectionMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggleSelect?.();
+        return;
+      }
       // Prevent navigation if we just triggered a long press
       if (didLongPress.current) {
         e.preventDefault();
@@ -79,28 +90,50 @@ export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelet
         didLongPress.current = false;
       }
     },
-    []
+    [selectionMode, onToggleSelect]
   );
 
   return (
     <div
       className={cn(
         "group relative animate-fade-in",
-        isFocused && "ring-2 ring-amber-400/70 ring-offset-2 ring-offset-background rounded-2xl"
+        isFocused && "ring-2 ring-amber-400/70 ring-offset-2 ring-offset-background rounded-2xl",
+        selectionMode && isSelected && "ring-2 ring-amber-500 ring-offset-2 ring-offset-background rounded-2xl",
+        selectionMode && !isSelected && "opacity-75 hover:opacity-100"
       )}
       data-card-index={index}
-      onContextMenu={onContextMenu}
+      onContextMenu={selectionMode ? undefined : onContextMenu}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Selection checkbox overlay */}
+      {selectionMode && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleSelect?.();
+          }}
+          className={cn(
+            "absolute top-3 left-3 z-10 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200",
+            isSelected
+              ? "bg-amber-500 border-amber-500 text-white shadow-sm"
+              : "bg-white/90 border-border/80 hover:border-amber-400 backdrop-blur-sm"
+          )}
+        >
+          {isSelected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+        </button>
+      )}
+
       <Link
         href={`/minnen/${memory.id}`}
         onClick={handleClick}
         className={cn(
           "block rounded-2xl border border-border/60 bg-card overflow-hidden",
           `accent-line-top accent-line-${memory.content_type}`,
-          `card-glow-${memory.content_type}`
+          `card-glow-${memory.content_type}`,
+          selectionMode && "cursor-pointer"
         )}
       >
         {/* Image preview */}
@@ -172,42 +205,44 @@ export function MemoryCard({ memory, index, isFocused, onToggleFavorite, onDelet
               {config.label}
             </span>
 
-            <div className="flex items-center gap-0.5">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onToggleFavorite?.(memory.id, memory.is_favorite);
-                }}
-                className={cn(
-                  "p-1.5 rounded-lg transition-all",
-                  memory.is_favorite
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-100"
-                )}
-                title={memory.is_favorite ? "Ta bort favorit" : "Favorit"}
-              >
-                <Star
+            {!selectionMode && (
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onToggleFavorite?.(memory.id, memory.is_favorite);
+                  }}
                   className={cn(
-                    "h-3.5 w-3.5 transition-colors",
+                    "p-1.5 rounded-lg transition-all",
                     memory.is_favorite
-                      ? "fill-amber-400 text-amber-400"
-                      : "text-muted-foreground/50 hover:text-amber-400"
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
                   )}
-                />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete?.(memory.id);
-                }}
-                className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
-                title="Ta bort"
-              >
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-destructive transition-colors" />
-              </button>
-            </div>
+                  title={memory.is_favorite ? "Ta bort favorit" : "Favorit"}
+                >
+                  <Star
+                    className={cn(
+                      "h-3.5 w-3.5 transition-colors",
+                      memory.is_favorite
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/50 hover:text-amber-400"
+                    )}
+                  />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete?.(memory.id);
+                  }}
+                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50"
+                  title="Ta bort"
+                >
+                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-destructive transition-colors" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Title */}

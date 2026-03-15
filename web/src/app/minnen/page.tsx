@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { CheckSquare } from "lucide-react";
 import type { MemoryFilters } from "@/lib/types";
 import { useMemories } from "@/hooks/useMemories";
 import { useSpaces } from "@/hooks/useSpaces";
 import { useProjects } from "@/hooks/useProjects";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { MemoryGrid } from "@/components/memories/MemoryGrid";
+import { cn } from "@/lib/utils";
 
 function MinnenContent() {
   const searchParams = useSearchParams();
@@ -16,6 +18,7 @@ function MinnenContent() {
   const { projects } = useProjects();
   const [filters, setFilters] = useState<MemoryFilters>({ is_inbox: false });
   const [activeSpaceName, setActiveSpaceName] = useState<string | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
   const { memories, count, isLoading, mutate } = useMemories(filters);
 
   const handleAddToProject = async (memoryId: string, projectId: string) => {
@@ -53,22 +56,47 @@ function MinnenContent() {
     mutate();
   };
 
+  const handleBulkComplete = useCallback(() => {
+    mutate();
+    setSelectionMode(false);
+  }, [mutate]);
+
   return (
     <div className="space-y-8">
       <div className="animate-fade-in">
-        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
-          Samling
-        </p>
-        <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
-          {activeSpaceName || "Minnen"}
-        </h1>
-        <p className="text-[14px] text-muted-foreground/70 mt-2.5">
-          {activeSpaceName
-            ? `${count} minnen i detta space`
-            : count > 0
-            ? `${count} sparade minnen`
-            : "Bläddra och sök bland dina minnen"}
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
+              Samling
+            </p>
+            <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
+              {activeSpaceName || "Minnen"}
+            </h1>
+            <p className="text-[14px] text-muted-foreground/70 mt-2.5">
+              {activeSpaceName
+                ? `${count} minnen i detta space`
+                : count > 0
+                ? `${count} sparade minnen`
+                : "Bläddra och sök bland dina minnen"}
+            </p>
+          </div>
+
+          {/* Selection mode toggle */}
+          {memories.length > 0 && (
+            <button
+              onClick={() => setSelectionMode(!selectionMode)}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-2 rounded-xl text-[12px] font-semibold transition-all mt-2 shrink-0",
+                selectionMode
+                  ? "bg-amber-500 text-white shadow-sm hover:bg-amber-600"
+                  : "bg-accent text-muted-foreground hover:bg-accent/80 hover:text-foreground"
+              )}
+            >
+              <CheckSquare className="h-4 w-4" strokeWidth={1.5} />
+              {selectionMode ? "Avsluta" : "Markera"}
+            </button>
+          )}
+        </div>
 
         <div className="divider-ornament mt-7 max-w-md">
           <span className="text-primary/30 text-[8px]">&#9670;</span>
@@ -99,9 +127,11 @@ function MinnenContent() {
         <MemoryGrid
           memories={memories}
           projects={projects}
+          selectionMode={selectionMode}
           onToggleFavorite={handleToggleFavorite}
           onDelete={handleDelete}
           onAddToProject={handleAddToProject}
+          onBulkComplete={handleBulkComplete}
         />
       )}
     </div>

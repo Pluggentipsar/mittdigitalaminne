@@ -22,10 +22,25 @@ import {
   GraduationCap,
 } from "lucide-react";
 import useSWR from "swr";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { Project, Memory } from "@/lib/types";
 import { useProjectMemories } from "@/hooks/useProjectMemories";
 import { ProjectForm } from "@/components/projects/ProjectForm";
-import { MemoryCard } from "@/components/memories/MemoryCard";
+import { SortableMemoryCard } from "@/components/projects/SortableMemoryCard";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -67,6 +82,49 @@ export default function ProjectDetailPage({
 
   const project = projectData?.data;
   const IconComponent = project ? iconMap[project.icon] || Folder : Folder;
+
+  // DnD sensors with activation constraint to avoid accidental drags
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = memories.findIndex((m) => m.id === active.id);
+      const newIndex = memories.findIndex((m) => m.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = arrayMove(memories, oldIndex, newIndex);
+
+      // Optimistic update
+      mutateMemories({ data: reordered }, false);
+
+      // Persist to server
+      try {
+        await fetch(`/api/projects/${id}/memories/reorder`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            memory_ids: reordered.map((m) => m.id),
+          }),
+        });
+      } catch {
+        // Revert on failure
+        mutateMemories();
+      }
+    },
+    [memories, mutateMemories, id]
+  );
 
   const handleEdit = async (data: Partial<Project>) => {
     await fetch(`/api/projects/${id}`, {
@@ -327,7 +385,7 @@ export default function ProjectDetailPage({
         )}
       </div>
 
-      {/* Memory grid */}
+      {/* Memory grid with drag & drop */}
       {memoriesLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -347,16 +405,34 @@ export default function ProjectDetailPage({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {memories.map((memory) => (
-            <MemoryCard
-              key={memory.id}
-              memory={memory}
-              onToggleFavorite={handleToggleFavorite}
-              onDelete={(memoryId) => handleRemoveFromProject(memoryId)}
-            />
-          ))}
-        </div>
+        <>
+          {memories.length > 1 && (
+            <p className="text-[11px] text-muted-foreground/40 font-medium -mt-2 mb-1">
+              Dra i handtaget för att ändra ordning
+            </p>
+          )}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={memories.map((m) => m.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {memories.map((memory) => (
+                  <SortableMemoryCard
+                    key={memory.id}
+                    memory={memory}
+                    onToggleFavorite={handleToggleFavorite}
+                    onDelete={(memoryId) => handleRemoveFromProject(memoryId)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </>
       )}
 
       {/* Edit form modal */}

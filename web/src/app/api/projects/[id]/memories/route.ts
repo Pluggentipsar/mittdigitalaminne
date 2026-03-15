@@ -10,8 +10,9 @@ export async function GET(
 
   const { data: junctions, error: junctionError } = await supabase
     .from("memory_projects")
-    .select("memory_id")
+    .select("memory_id, sort_order")
     .eq("project_id", id)
+    .order("sort_order", { ascending: true })
     .order("added_at", { ascending: false });
 
   if (junctionError) {
