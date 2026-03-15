@@ -24,6 +24,7 @@
   --color-type-youtube: var(--type-youtube);
   --color-type-linkedin: var(--type-linkedin);
   --color-type-instagram: var(--type-instagram);
+  --color-type-twitter: var(--type-twitter);
   --font-sans: var(--font-body);
   --font-serif: var(--font-display);
 }
@@ -55,6 +56,7 @@
   --type-youtube: #dc2626;
   --type-linkedin: #0a66c2;
   --type-instagram: #db2777;
+  --type-twitter: #1d9bf0;
 
   --destructive: #dc2626;
 
@@ -231,6 +233,7 @@ body::before {
 .badge-type-youtube { background: rgba(220, 38, 38, 0.08); color: #b91c1c; }
 .badge-type-linkedin { background: rgba(10, 102, 194, 0.08); color: #0858a1; }
 .badge-type-instagram { background: rgba(219, 39, 119, 0.08); color: #be185d; }
+.badge-type-twitter { background: rgba(29, 155, 240, 0.08); color: #1a8cd8; }
 
 /* === Card hover === */
 .card-hover {
@@ -249,6 +252,7 @@ body::before {
 .card-glow-youtube { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 .card-glow-linkedin { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 .card-glow-instagram { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.card-glow-twitter { transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 
 .card-glow-image:hover { box-shadow: 0 8px 24px rgba(217, 119, 6, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-link:hover { box-shadow: 0 8px 24px rgba(3, 105, 161, 0.10), var(--shadow-sm); transform: translateY(-3px); }
@@ -257,6 +261,7 @@ body::before {
 .card-glow-youtube:hover { box-shadow: 0 8px 24px rgba(220, 38, 38, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-linkedin:hover { box-shadow: 0 8px 24px rgba(10, 102, 194, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 .card-glow-instagram:hover { box-shadow: 0 8px 24px rgba(219, 39, 119, 0.10), var(--shadow-sm); transform: translateY(-3px); }
+.card-glow-twitter:hover { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.10), var(--shadow-sm); transform: translateY(-3px); }
 
 /* === Accent top line on cards === */
 .accent-line-top {
@@ -285,6 +290,7 @@ body::before {
 .accent-line-youtube::before { background: linear-gradient(90deg, #dc2626, #f87171); }
 .accent-line-linkedin::before { background: linear-gradient(90deg, #0a66c2, #38bdf8); }
 .accent-line-instagram::before { background: linear-gradient(90deg, #db2777, #f472b6); }
+.accent-line-twitter::before { background: linear-gradient(90deg, #1d9bf0, #60c5f7); }
 
 /* === Ambient orb === */
 .ambient-orb {

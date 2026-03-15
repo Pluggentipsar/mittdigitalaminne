@@ -296,13 +296,18 @@ export default function MemoryDetailPage({
         <SocialPreview type="linkedin" linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
 
+      {/* Twitter/X preview */}
+      {memory.content_type === "twitter" && memory.link_url && (
+        <SocialPreview type="twitter" linkUrl={memory.link_url} metadata={memory.link_metadata} />
+      )}
+
       {/* Link preview */}
       {memory.content_type === "link" && memory.link_url && memory.link_metadata?.og_image && (
         <LinkPreview linkUrl={memory.link_url} metadata={memory.link_metadata} />
       )}
 
       {/* Fallback link */}
-      {memory.link_url && !["youtube", "linkedin", "instagram"].includes(memory.content_type) && !(memory.content_type === "link" && memory.link_metadata?.og_image) && (
+      {memory.link_url && !["youtube", "linkedin", "instagram", "twitter"].includes(memory.content_type) && !(memory.content_type === "link" && memory.link_metadata?.og_image) && (
         <a
           href={memory.link_url}
           target="_blank"

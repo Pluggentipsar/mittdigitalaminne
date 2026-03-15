@@ -1,4 +1,4 @@
-export type ContentType = "image" | "link" | "article" | "thought" | "youtube" | "linkedin" | "instagram";
+export type ContentType = "image" | "link" | "article" | "thought" | "youtube" | "linkedin" | "instagram" | "twitter";
 
 export interface Memory {
   id: string;

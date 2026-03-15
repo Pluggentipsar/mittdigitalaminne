@@ -8,7 +8,7 @@ interface UnfurlResult {
   image: string | null;
   favicon: string | null;
   domain: string;
-  content_type_hint: "youtube" | "linkedin" | "instagram" | null;
+  content_type_hint: "youtube" | "linkedin" | "instagram" | "twitter" | null;
   video_id?: string;
   channel_name?: string;
   article_text?: string;
@@ -18,10 +18,11 @@ interface UnfurlResult {
   read_time_minutes?: number;
 }
 
-function detectType(hostname: string): "youtube" | "linkedin" | "instagram" | null {
+function detectType(hostname: string): "youtube" | "linkedin" | "instagram" | "twitter" | null {
   if (hostname.includes("youtube.com") || hostname === "youtu.be") return "youtube";
   if (hostname.includes("linkedin.com")) return "linkedin";
   if (hostname.includes("instagram.com")) return "instagram";
+  if (hostname.includes("twitter.com") || hostname.includes("x.com")) return "twitter";
   return null;
 }
 
@@ -222,7 +223,7 @@ function smartTruncateTitle(
   if (title.length <= maxLength) return { title, fullCaption: null };
 
   // Only truncate for social platforms
-  if (typeHint !== "instagram" && typeHint !== "linkedin") {
+  if (typeHint !== "instagram" && typeHint !== "linkedin" && typeHint !== "twitter") {
     return { title, fullCaption: null };
   }
 

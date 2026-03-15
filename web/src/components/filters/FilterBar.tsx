@@ -24,6 +24,7 @@ const typeButtons: { type: ContentType | null; label: string; icon: any }[] = [
   { type: "youtube", label: "YouTube", icon: Youtube },
   { type: "linkedin", label: "LinkedIn", icon: Link2 },
   { type: "instagram", label: "Instagram", icon: Image },
+  { type: "twitter", label: "X", icon: Link2 },
 ];
 
 const sortOptions = [

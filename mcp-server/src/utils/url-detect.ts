@@ -2,7 +2,7 @@
  * Auto-detect content type from URL patterns.
  * Returns the detected type or null if no match.
  */
-export function detectContentType(url: string): "youtube" | "linkedin" | "instagram" | null {
+export function detectContentType(url: string): "youtube" | "linkedin" | "instagram" | "twitter" | null {
   try {
     const u = new URL(url);
     const host = u.hostname.toLowerCase();
@@ -10,6 +10,7 @@ export function detectContentType(url: string): "youtube" | "linkedin" | "instag
     if (host.includes("youtube.com") || host === "youtu.be") return "youtube";
     if (host.includes("linkedin.com")) return "linkedin";
     if (host.includes("instagram.com")) return "instagram";
+    if (host.includes("twitter.com") || host.includes("x.com")) return "twitter";
   } catch {}
   return null;
 }

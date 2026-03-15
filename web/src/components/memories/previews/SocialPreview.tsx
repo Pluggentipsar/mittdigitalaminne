@@ -2,10 +2,17 @@
 
 import { ExternalLink, Linkedin, Instagram } from "lucide-react";
 import type { LinkMetadata } from "@/lib/types";
-import { contentTypeConfig } from "@/lib/utils";
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 interface SocialPreviewProps {
-  type: "linkedin" | "instagram";
+  type: "linkedin" | "instagram" | "twitter";
   linkUrl: string;
   metadata: LinkMetadata | null;
 }
@@ -13,6 +20,10 @@ interface SocialPreviewProps {
 export function SocialPreview({ type, linkUrl, metadata }: SocialPreviewProps) {
   if (type === "linkedin") {
     return <LinkedInPreview linkUrl={linkUrl} metadata={metadata} />;
+  }
+
+  if (type === "twitter") {
+    return <TwitterPreview linkUrl={linkUrl} metadata={metadata} />;
   }
 
   // Fallback for instagram without embed (shouldn't happen normally)
@@ -75,6 +86,69 @@ function LinkedInPreview({ linkUrl, metadata }: { linkUrl: string; metadata: Lin
           </div>
           <span className="text-[11px] text-muted-foreground/40 font-medium">
             {metadata?.domain || "linkedin.com"}
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+/* ─── X/Twitter rich preview ─── */
+
+function TwitterPreview({ linkUrl, metadata }: { linkUrl: string; metadata: LinkMetadata | null }) {
+  const hasContent = metadata?.og_title || metadata?.og_description;
+
+  return (
+    <a
+      href={linkUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-2xl overflow-hidden border border-border/50 bg-card shadow-xs hover:shadow-md transition-all group"
+    >
+      {/* Header bar with X branding */}
+      <div className="flex items-center gap-2.5 px-5 py-3.5 bg-[#1d9bf0]/[0.04] border-b border-border/30">
+        <div className="w-7 h-7 rounded-lg bg-[#0f1419] flex items-center justify-center shrink-0">
+          <XIcon className="h-3.5 w-3.5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <span className="text-[11px] font-semibold text-[#1d9bf0]/70 tracking-wide">
+            X / TWITTER
+          </span>
+        </div>
+        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/25 group-hover:text-[#1d9bf0] transition-colors shrink-0" />
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        {metadata?.og_title && (
+          <p className="text-[15px] font-semibold leading-snug line-clamp-3 group-hover:text-[#1d9bf0] transition-colors">
+            {metadata.og_title}
+          </p>
+        )}
+        {metadata?.author_name && (
+          <p className="text-[12px] text-muted-foreground/70 mt-2 font-medium">
+            @{metadata.author_name}
+          </p>
+        )}
+        {metadata?.og_description && (
+          <p className="text-[13px] text-muted-foreground/60 mt-2.5 line-clamp-4 leading-relaxed">
+            {metadata.og_description}
+          </p>
+        )}
+
+        {!hasContent && (
+          <p className="text-[13px] text-muted-foreground/40 italic">
+            X/Twitter-inlägg
+          </p>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-border/30">
+          <div className="w-4 h-4 rounded bg-[#0f1419]/8 flex items-center justify-center shrink-0">
+            <XIcon className="h-2.5 w-2.5 text-[#536471]" />
+          </div>
+          <span className="text-[11px] text-muted-foreground/40 font-medium">
+            {metadata?.domain || "x.com"}
           </span>
         </div>
       </div>

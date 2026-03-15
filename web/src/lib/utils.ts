@@ -79,4 +79,12 @@ export const contentTypeConfig: Record<
     badgeClass: "badge-type-instagram",
     hex: "#db2777",
   },
+  twitter: {
+    label: "X/Twitter",
+    color: "text-type-twitter",
+    bgColor: "bg-type-twitter/8",
+    borderColor: "border-l-type-twitter",
+    badgeClass: "badge-type-twitter",
+    hex: "#1d9bf0",
+  },
 };

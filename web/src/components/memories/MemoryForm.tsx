@@ -16,6 +16,7 @@ const typeOptions: { type: ContentType; icon: any; desc: string }[] = [
   { type: "youtube", icon: Youtube, desc: "YouTube-video" },
   { type: "linkedin", icon: Link2, desc: "LinkedIn-inlägg" },
   { type: "instagram", icon: Image, desc: "Instagram-inlägg" },
+  { type: "twitter", icon: Link2, desc: "X/Twitter-inlägg" },
 ];
 
 interface MemoryFormProps {
@@ -162,7 +163,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
         tags,
       };
 
-      if (["link", "article", "youtube", "linkedin", "instagram"].includes(contentType)) {
+      if (["link", "article", "youtube", "linkedin", "instagram", "twitter"].includes(contentType)) {
         body.link_url = linkUrl.trim() || null;
 
         if (unfurlData && mode === "create") {
@@ -307,7 +308,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       </div>
 
       {/* URL field */}
-      {["link", "article", "youtube", "linkedin", "instagram"].includes(contentType) && (
+      {["link", "article", "youtube", "linkedin", "instagram", "twitter"].includes(contentType) && (
         <div className="animate-fade-in">
           <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
             URL
