@@ -16,7 +16,7 @@ export default function FlodePage() {
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [sort, setSort] = useState<"newest" | "oldest" | "relevance" | "smart">("smart");
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const { items, count, isLoading, mutate } = useFeedItems({
@@ -29,8 +29,11 @@ export default function FlodePage() {
 
   const { sources, categories, mutate: mutateSources } = useFeeds();
 
-  const selectedItem =
-    selectedIndex !== null && items[selectedIndex] ? items[selectedIndex] : null;
+  // Find selected item and its current index by ID (stable across re-fetches)
+  const selectedIndex = selectedItemId !== null
+    ? items.findIndex((i) => i.id === selectedItemId)
+    : -1;
+  const selectedItem = selectedIndex >= 0 ? items[selectedIndex] : null;
 
   const handleSave = useCallback(
     async (itemId: string) => {
@@ -51,10 +54,17 @@ export default function FlodePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_read: true }),
       });
-      mutate();
+      // Don't mutate here — avoids re-sorting which causes carousel bug.
+      // The list will refresh when the modal is closed or on next user action.
     },
-    [mutate]
+    []
   );
+
+  const handleModalClose = useCallback(() => {
+    setSelectedItemId(null);
+    // Refresh the list when closing to reflect read status changes
+    mutate();
+  }, [mutate]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -74,25 +84,20 @@ export default function FlodePage() {
 
   const handleItemClick = useCallback(
     (item: FeedItem) => {
-      const idx = items.findIndex((i) => i.id === item.id);
-      setSelectedIndex(idx >= 0 ? idx : null);
+      setSelectedItemId(item.id);
     },
-    [items]
+    []
   );
 
   const handlePrev = useCallback(() => {
-    setSelectedIndex((prev) => {
-      if (prev === null || prev <= 0) return prev;
-      return prev - 1;
-    });
-  }, []);
+    if (selectedIndex <= 0) return;
+    setSelectedItemId(items[selectedIndex - 1]?.id || null);
+  }, [selectedIndex, items]);
 
   const handleNext = useCallback(() => {
-    setSelectedIndex((prev) => {
-      if (prev === null || prev >= items.length - 1) return prev;
-      return prev + 1;
-    });
-  }, [items.length]);
+    if (selectedIndex < 0 || selectedIndex >= items.length - 1) return;
+    setSelectedItemId(items[selectedIndex + 1]?.id || null);
+  }, [selectedIndex, items]);
 
   const hasSources = sources.length > 0;
 
@@ -354,17 +359,15 @@ export default function FlodePage() {
 
       {/* Feed Detail Modal */}
       <FeedDetailModal
-        open={selectedIndex !== null}
+        open={selectedItemId !== null}
         item={selectedItem}
-        onClose={() => setSelectedIndex(null)}
+        onClose={handleModalClose}
         onSave={handleSave}
         onMarkRead={handleMarkRead}
         onPrev={handlePrev}
         onNext={handleNext}
-        hasPrev={selectedIndex !== null && selectedIndex > 0}
-        hasNext={
-          selectedIndex !== null && selectedIndex < items.length - 1
-        }
+        hasPrev={selectedIndex > 0}
+        hasNext={selectedIndex >= 0 && selectedIndex < items.length - 1}
       />
 
       {/* Add Feed Modal */}
