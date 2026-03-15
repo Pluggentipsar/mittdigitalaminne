@@ -111,27 +111,23 @@ export default function FlodePage() {
   const showMixed = !activeType;
 
   return (
-    <div className="space-y-8">
-      {/* Hero header */}
+    <div className="space-y-5 md:space-y-8">
+      {/* Hero header — compact on mobile */}
       <div className="animate-fade-in">
-        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-3">
+        <p className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.18em] mb-2">
           Flöde
         </p>
-        <h1 className="heading-serif text-[36px] md:text-[44px] text-foreground leading-[1.05]">
+        <h1 className="heading-serif text-[28px] md:text-[44px] text-foreground leading-[1.05]">
           Ditt flöde
         </h1>
-        <p className="text-[14px] text-muted-foreground/70 mt-2.5">
+        <p className="text-[13px] md:text-[14px] text-muted-foreground/70 mt-1.5 hidden sm:block">
           Nytt innehåll från dina källor, kurerat efter dina intressen.
         </p>
-
-        <div className="divider-ornament mt-7 max-w-md">
-          <span className="text-primary/30 text-[8px]">&#9670;</span>
-        </div>
       </div>
 
       {/* Toolbar */}
       <div
-        className="flex flex-wrap items-center gap-3 animate-fade-in"
+        className="animate-fade-in"
         style={{ animationDelay: "0.05s" }}
       >
         <FeedFilterBar
@@ -150,42 +146,38 @@ export default function FlodePage() {
         />
       </div>
 
-      {/* Action buttons */}
+      {/* Action buttons — compact row */}
       <div
-        className="flex items-center gap-2 animate-fade-in"
+        className="flex items-center gap-1.5 animate-fade-in"
         style={{ animationDelay: "0.1s" }}
       >
         <button
           onClick={() => setAddModalOpen(true)}
-          className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary/90 transition-all shadow-xs whitespace-nowrap"
+          className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold hover:bg-primary/90 transition-all shadow-xs whitespace-nowrap"
         >
-          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-          <span className="hidden sm:inline">Lägg till källa</span>
-          <span className="sm:hidden">Ny källa</span>
+          <Plus className="h-3 w-3" strokeWidth={2.5} />
+          <span>Ny källa</span>
         </button>
 
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all disabled:opacity-50 whitespace-nowrap"
+          className="flex items-center gap-1 h-7 px-2.5 rounded-full border border-border/40 text-[11px] font-medium text-muted-foreground/50 hover:text-foreground hover:border-border transition-all disabled:opacity-50 whitespace-nowrap"
           title="Hämta nytt innehåll"
         >
           <RefreshCw
-            className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+            className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`}
             strokeWidth={1.5}
           />
-          <span className="sm:hidden">{refreshing ? "..." : "Uppdatera"}</span>
-          <span className="hidden sm:inline">
-            {refreshing ? "Uppdaterar..." : "Uppdatera"}
-          </span>
+          <span>{refreshing ? "..." : "Uppdatera"}</span>
         </button>
 
         <Link
           href="/flode/kallor"
-          className="flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-full border border-border/50 text-[13px] font-medium text-muted-foreground/60 hover:text-foreground hover:border-border transition-all whitespace-nowrap"
+          className="flex items-center gap-1 h-7 px-2.5 rounded-full border border-border/40 text-[11px] font-medium text-muted-foreground/50 hover:text-foreground hover:border-border transition-all whitespace-nowrap"
           title="Hantera källor"
         >
-          <Settings2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+          <Settings2 className="h-3 w-3" strokeWidth={1.5} />
           <span>Källor ({sources.length})</span>
         </Link>
       </div>
