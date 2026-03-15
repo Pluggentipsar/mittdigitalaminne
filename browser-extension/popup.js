@@ -1,11 +1,14 @@
-// Mitt Digitala Minne - Browser Extension
+// Mitt Digitala Minne - Browser Extension v1.1
 (async function () {
   // DOM refs
   const pageUrlEl = document.getElementById("page-url");
   const pageTitleEl = document.getElementById("page-title");
+  const pageSummaryEl = document.getElementById("page-summary");
   const tagInputEl = document.getElementById("tag-input");
   const tagsListEl = document.getElementById("tags-list");
   const addTagBtn = document.getElementById("add-tag-btn");
+  const tagSuggestionsEl = document.getElementById("tag-suggestions");
+  const typeSelectorEl = document.getElementById("type-selector");
   const saveInboxBtn = document.getElementById("save-inbox");
   const saveNowBtn = document.getElementById("save-now");
   const loadingEl = document.getElementById("loading");
@@ -25,6 +28,7 @@
   let unfurlData = null;
   let currentUrl = "";
   let config = {};
+  let selectedType = "link";
 
   // Load config
   const stored = await chrome.storage.sync.get(["serverUrl", "apiKey"]);
@@ -53,6 +57,25 @@
   // Auto-unfurl
   unfurlUrl(currentUrl);
 
+  // Fetch tag suggestions
+  fetchTagSuggestions();
+
+  // Content type selector
+  typeSelectorEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".type-btn");
+    if (!btn) return;
+    typeSelectorEl.querySelectorAll(".type-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedType = btn.dataset.type;
+  });
+
+  function setContentType(type) {
+    selectedType = type;
+    typeSelectorEl.querySelectorAll(".type-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.type === type);
+    });
+  }
+
   // Tag management
   addTagBtn.addEventListener("click", addTag);
   tagInputEl.addEventListener("keydown", (e) => {
@@ -62,13 +85,13 @@
     }
   });
 
-  function addTag() {
-    const val = tagInputEl.value.trim().toLowerCase();
+  function addTag(name) {
+    const val = (name || tagInputEl.value).trim().toLowerCase();
     if (val && !tags.includes(val)) {
       tags.push(val);
       renderTags();
     }
-    tagInputEl.value = "";
+    if (!name) tagInputEl.value = "";
   }
 
   function removeTag(tag) {
@@ -86,6 +109,49 @@
     tagsListEl.querySelectorAll(".tag-remove").forEach((btn) => {
       btn.addEventListener("click", () => removeTag(btn.dataset.tag));
     });
+    // Update suggestion visibility
+    updateSuggestions();
+  }
+
+  // Tag suggestions
+  async function fetchTagSuggestions() {
+    try {
+      const res = await fetch(`${config.serverUrl}/api/tags`, {
+        headers: { Authorization: `Bearer ${config.apiKey}` },
+      });
+      if (!res.ok) return;
+      const { data } = await res.json();
+      if (!data || data.length === 0) return;
+
+      // Store suggestions
+      tagSuggestionsEl.dataset.tags = JSON.stringify(data.map((t) => t.name));
+      updateSuggestions();
+    } catch {
+      // Best-effort
+    }
+  }
+
+  function updateSuggestions() {
+    try {
+      const allTags = JSON.parse(tagSuggestionsEl.dataset.tags || "[]");
+      const available = allTags.filter((t) => !tags.includes(t)).slice(0, 8);
+
+      if (available.length === 0) {
+        tagSuggestionsEl.classList.add("hidden");
+        return;
+      }
+
+      tagSuggestionsEl.innerHTML = available
+        .map((t) => `<button class="suggestion-chip" data-tag="${t}">${t}</button>`)
+        .join("");
+      tagSuggestionsEl.classList.remove("hidden");
+
+      tagSuggestionsEl.querySelectorAll(".suggestion-chip").forEach((chip) => {
+        chip.addEventListener("click", () => addTag(chip.dataset.tag));
+      });
+    } catch {
+      // ignore
+    }
   }
 
   // Unfurl
@@ -106,6 +172,16 @@
 
       if (data.title && !pageTitleEl.value) {
         pageTitleEl.value = data.title;
+      }
+
+      // Pre-fill summary from description
+      if (data.description && !pageSummaryEl.value) {
+        pageSummaryEl.value = data.description;
+      }
+
+      // Auto-detect content type
+      if (data.content_type_hint) {
+        setContentType(data.content_type_hint);
       }
 
       if (data.image) {
@@ -134,21 +210,18 @@
     saveInboxBtn.disabled = true;
     saveNowBtn.disabled = true;
 
-    // Detect content type
-    let contentType = "link";
-    if (unfurlData?.content_type_hint) {
-      contentType = unfurlData.content_type_hint;
-    }
+    const summary = pageSummaryEl.value.trim() || null;
 
     const body = {
-      content_type: contentType,
+      content_type: selectedType,
       title,
       link_url: currentUrl,
-      summary: unfurlData?.description || null,
+      summary: summary || (unfurlData?.description || null),
       original_content: unfurlData?.article_text || null,
       snapshot_html: unfurlData?.snapshot_html || null,
       snapshot_taken_at: new Date().toISOString(),
       is_inbox: toInbox,
+      source: "extension",
       tags,
       link_metadata: unfurlData
         ? {

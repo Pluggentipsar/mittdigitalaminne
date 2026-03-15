@@ -10,7 +10,7 @@ export interface Memory {
   image_storage_path: string | null;
   link_url: string | null;
   link_metadata: LinkMetadata | null;
-  source: "mcp" | "web" | "manual";
+  source: "mcp" | "web" | "manual" | "import" | "extension";
   is_favorite: boolean;
   is_inbox: boolean;
   snapshot_html: string | null;

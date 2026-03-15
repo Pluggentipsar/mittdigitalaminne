@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Mitt Digitala Minne",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Spara den här sidan till Mitt Digitala Minne",
   "permissions": ["activeTab", "storage"],
   "action": {
@@ -16,6 +16,15 @@
     "16": "icons/icon-16.svg",
     "48": "icons/icon-48.svg",
     "128": "icons/icon-128.svg"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+M",
+        "mac": "Alt+M"
+      },
+      "description": "Spara sidan till Mitt Digitala Minne"
+    }
   },
   "options_page": "options.html",
   "host_permissions": ["<all_urls>"]

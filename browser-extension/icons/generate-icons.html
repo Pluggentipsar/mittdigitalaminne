@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html>
-<head><title>Generate Icons</title></head>
 <body>
-<p>Open this file in a browser, right-click each canvas, and "Save image as" with the correct filename.</p>
-<div id="icons"></div>
+<h2>Generate PNG icons</h2>
+<p>Right-click each image and 'Save image as...'</p>
+<div>
+  <h3>icon-16.png</h3>
+  <canvas id='c16' width='16' height='16'></canvas>
+  <h3>icon-48.png</h3>
+  <canvas id='c48' width='48' height='48'></canvas>
+  <h3>icon-128.png</h3>
+  <canvas id='c128' width='128' height='128'></canvas>
+</div>
 <script>
-const sizes = [16, 48, 128];
-const container = document.getElementById('icons');
-
-sizes.forEach(size => {
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
+function draw(id, size) {
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
   // Background circle
-  const r = size / 2;
-  ctx.beginPath();
-  ctx.arc(r, r, r, 0, Math.PI * 2);
   ctx.fillStyle = '#b45309';
-  ctx.fill();
-
-  // Inner circle (amber glow)
   ctx.beginPath();
-  ctx.arc(r, r, r * 0.35, 0, Math.PI * 2);
-  ctx.fillStyle = '#fbbf24';
+  ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
   ctx.fill();
-
-  // Label
-  const label = document.createElement('p');
-  label.textContent = `icon-${size}.png — right-click → Save image as`;
-  container.appendChild(label);
-  container.appendChild(canvas);
-  container.appendChild(document.createElement('br'));
-});
+  // Inner circle
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size*0.3, 0, Math.PI*2);
+  ctx.fill();
+  
+  // Convert to PNG and create download link
+  const dataUrl = c.toDataURL('image/png');
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = 'icon-' + size + '.png';
+  link.textContent = 'Download icon-' + size + '.png';
+  link.style.display = 'block';
+  link.style.margin = '5px 0';
+  c.parentElement.appendChild(link);
+}
+draw('c16', 16);
+draw('c48', 48);
+draw('c128', 128);
 </script>
 </body>
 </html>

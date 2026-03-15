@@ -94,10 +94,12 @@ export async function POST(req: NextRequest) {
 
   const { tags: tagNames, ...memoryData } = body;
 
-  // Create memory
+  // Create memory — allow source override from extension/import
+  const validSources = ["web", "mcp", "manual", "import", "extension"];
+  const source = validSources.includes(memoryData.source) ? memoryData.source : "web";
   const { data: memory, error } = await supabase
     .from("memories")
-    .insert({ ...memoryData, source: "web" })
+    .insert({ ...memoryData, source })
     .select("*")
     .single();
 

@@ -34,6 +34,27 @@
         <input type="text" id="page-title" placeholder="Laddar...">
       </div>
 
+      <!-- Summary / description -->
+      <div class="field">
+        <label>Sammanfattning <span class="optional">(valfritt)</span></label>
+        <textarea id="page-summary" placeholder="Kort beskrivning..." rows="2"></textarea>
+      </div>
+
+      <!-- Content type selector -->
+      <div class="field">
+        <label>Typ</label>
+        <div class="type-selector" id="type-selector">
+          <button class="type-btn active" data-type="link" title="Länk">🔗</button>
+          <button class="type-btn" data-type="article" title="Artikel">📄</button>
+          <button class="type-btn" data-type="youtube" title="YouTube">▶️</button>
+          <button class="type-btn" data-type="thought" title="Tanke">💡</button>
+          <button class="type-btn" data-type="image" title="Bild">🖼️</button>
+          <button class="type-btn" data-type="twitter" title="X/Twitter">𝕏</button>
+          <button class="type-btn" data-type="linkedin" title="LinkedIn">in</button>
+          <button class="type-btn" data-type="instagram" title="Instagram">📷</button>
+        </div>
+      </div>
+
       <!-- Tags -->
       <div class="field">
         <label>Taggar <span class="optional">(valfritt)</span></label>
@@ -44,6 +65,8 @@
             <button id="add-tag-btn" class="btn-small">+</button>
           </div>
         </div>
+        <!-- Tag suggestions -->
+        <div class="tag-suggestions hidden" id="tag-suggestions"></div>
       </div>
 
       <!-- Unfurl preview -->

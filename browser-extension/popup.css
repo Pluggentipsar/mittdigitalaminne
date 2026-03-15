@@ -101,7 +101,8 @@ body {
   overflow: hidden;
 }
 
-.field input[type="text"] {
+.field input[type="text"],
+.field textarea {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid var(--border);
@@ -112,14 +113,51 @@ body {
   color: var(--text);
   outline: none;
   transition: border-color 0.2s;
+  font-family: inherit;
+  resize: none;
 }
 
-.field input[type="text"]:focus {
+.field input[type="text"]:focus,
+.field textarea:focus {
   border-color: var(--amber);
 }
 
-.field input[type="text"]::placeholder {
+.field input[type="text"]::placeholder,
+.field textarea::placeholder {
   color: var(--text-faint);
+}
+
+/* Content type selector */
+.type-selector {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.type-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--text-muted);
+}
+
+.type-btn:hover {
+  border-color: var(--amber);
+  background: var(--amber-bg);
+}
+
+.type-btn.active {
+  border-color: var(--amber);
+  background: var(--amber-bg);
+  box-shadow: 0 0 0 1px var(--amber);
 }
 
 /* Tags */
@@ -203,6 +241,32 @@ body {
 }
 
 .btn-small:hover {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+/* Tag suggestions */
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.suggestion-chip {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.suggestion-chip:hover {
   background: var(--amber-bg);
   color: var(--amber);
   border-color: var(--amber);
