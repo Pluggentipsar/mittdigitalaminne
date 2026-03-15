@@ -6,6 +6,8 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RecentMemories } from "@/components/dashboard/RecentMemories";
 import { TypeDistribution } from "@/components/dashboard/TypeDistribution";
 import { TimeCapsule } from "@/components/dashboard/TimeCapsule";
+import { ActivityCalendar } from "@/components/dashboard/ActivityCalendar";
+import { RemindersSection } from "@/components/dashboard/RemindersSection";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -41,7 +43,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Reminders — show prominently at top if any are due */}
+      {stats && stats.reminders && stats.reminders.length > 0 && (
+        <RemindersSection reminders={stats.reminders} />
+      )}
+
       <StatsCards stats={stats} />
+
+      {/* Activity calendar — full width */}
+      <ActivityCalendar activity={stats?.activity || []} />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">

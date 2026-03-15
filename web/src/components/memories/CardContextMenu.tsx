@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Check,
   Loader2,
+  Bell,
 } from "lucide-react";
 import type { Memory, Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -195,6 +196,26 @@ export function CardContextMenu({
             <p className="text-[11px] text-muted-foreground/50">Inga projekt ännu</p>
           </div>
         )}
+      </div>
+
+      {/* Påminn mig — quick options */}
+      <div>
+        <button
+          onClick={async () => {
+            const remindAt = new Date();
+            remindAt.setHours(remindAt.getHours() + 24);
+            await fetch(`/api/memories/${memory.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ remind_at: remindAt.toISOString() }),
+            });
+            onClose();
+          }}
+          className="w-full flex items-center gap-3 px-3.5 py-2 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+        >
+          <Bell className="h-4 w-4 text-muted-foreground/50" strokeWidth={1.5} />
+          Påminn mig imorgon
+        </button>
       </div>
 
       <div className="h-px bg-border/40 mx-2 my-1" />

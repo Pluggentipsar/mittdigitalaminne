@@ -15,6 +15,7 @@ export interface Memory {
   is_inbox: boolean;
   snapshot_html: string | null;
   snapshot_taken_at: string | null;
+  remind_at: string | null;
   created_at: string;
   updated_at: string;
   tags?: Tag[];
@@ -107,7 +108,10 @@ export interface MemoryStats {
   this_week: number;
   favorites: number;
   inbox_count: number;
+  reminders_due: number;
   by_type: Record<ContentType, number>;
   top_tags: { name: string; count: number }[];
   recent: { id: string; title: string; content_type: ContentType; created_at: string }[];
+  reminders: { id: string; title: string; content_type: ContentType; remind_at: string }[];
+  activity: { date: string; count: number }[];
 }

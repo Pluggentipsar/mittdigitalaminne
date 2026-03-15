@@ -18,6 +18,8 @@ import {
   Download,
   FileDown,
   FileText,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemory } from "@/hooks/useMemories";
@@ -50,6 +52,7 @@ export default function MemoryDetailPage({
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [memoryProjects, setMemoryProjects] = useState<Project[]>([]);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [reminderMenuOpen, setReminderMenuOpen] = useState(false);
 
   const fetchMemoryProjects = useCallback(async () => {
     try {
@@ -169,6 +172,83 @@ export default function MemoryDetailPage({
           >
             <FolderPlus className="h-[17px] w-[17px]" strokeWidth={1.5} />
           </button>
+          {/* Remind me dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setReminderMenuOpen(!reminderMenuOpen)}
+              className={cn(
+                "p-2.5 rounded-xl transition-all",
+                memory.remind_at
+                  ? "bg-amber-50 text-amber-600"
+                  : "hover:bg-accent text-muted-foreground/50 hover:text-foreground"
+              )}
+              title={memory.remind_at ? `Påminnelse: ${format(new Date(memory.remind_at), "d MMM, HH:mm", { locale: sv })}` : "Påminn mig"}
+            >
+              {memory.remind_at ? (
+                <Bell className="h-[17px] w-[17px] fill-amber-400/30" strokeWidth={1.5} />
+              ) : (
+                <Bell className="h-[17px] w-[17px]" strokeWidth={1.5} />
+              )}
+            </button>
+            {reminderMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setReminderMenuOpen(false)} />
+                <div
+                  className="absolute right-0 top-full mt-1.5 z-50 min-w-[200px] bg-card rounded-xl border border-border/60 shadow-lg py-1.5 animate-scale-in"
+                  style={{ transformOrigin: "top right" }}
+                >
+                  <p className="px-3.5 py-1.5 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">
+                    Påminn mig
+                  </p>
+                  {[
+                    { label: "Om 1 timme", hours: 1 },
+                    { label: "Imorgon", hours: 24 },
+                    { label: "Om 3 dagar", hours: 72 },
+                    { label: "Om 1 vecka", hours: 168 },
+                    { label: "Om 1 månad", hours: 720 },
+                  ].map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={async () => {
+                        const remindAt = new Date();
+                        remindAt.setHours(remindAt.getHours() + opt.hours);
+                        await fetch(`/api/memories/${id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ remind_at: remindAt.toISOString() }),
+                        });
+                        mutate();
+                        setReminderMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left text-[13px] font-medium hover:bg-accent/70 transition-colors"
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                  {memory.remind_at && (
+                    <>
+                      <div className="h-px bg-border/40 mx-2 my-1" />
+                      <button
+                        onClick={async () => {
+                          await fetch(`/api/memories/${id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ remind_at: null }),
+                          });
+                          mutate();
+                          setReminderMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left text-[13px] font-medium text-destructive hover:bg-red-50 transition-colors"
+                      >
+                        <BellOff className="h-4 w-4" strokeWidth={1.5} />
+                        Ta bort påminnelse
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
           <button
             onClick={() => setAiPanelOpen(true)}
             className="p-2.5 rounded-xl hover:bg-amber-50 text-muted-foreground/50 hover:text-amber-600 transition-all"
@@ -260,6 +340,12 @@ export default function MemoryDetailPage({
             <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 font-medium">
               <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
               {Math.max(1, Math.round(memory.original_content.split(/\s+/).length / 200))} min lästid
+            </div>
+          )}
+          {memory.remind_at && (
+            <div className="flex items-center gap-1.5 text-[12px] text-amber-600 font-medium">
+              <Bell className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Påminnelse: {format(new Date(memory.remind_at), "d MMM, HH:mm", { locale: sv })}
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/contexts/SidebarContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MainContent } from "@/components/layout/MainContent";
 import { CommandPalette } from "@/components/CommandPalette";
+import { QuickCaptureModal } from "@/components/QuickCaptureModal";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -66,6 +67,7 @@ export default function RootLayout({
           <Sidebar />
           <MainContent>{children}</MainContent>
           <CommandPalette />
+          <QuickCaptureModal />
         </SidebarProvider>
       </body>
     </html>
