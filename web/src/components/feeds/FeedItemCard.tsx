@@ -37,19 +37,6 @@ function timeAgo(dateStr: string | null): string {
   return date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" });
 }
 
-function feedTypeAccent(feedType: string | undefined): string {
-  switch (feedType) {
-    case "youtube":
-      return "border-l-red-500/70";
-    case "podcast":
-      return "border-l-emerald-500/70";
-    case "newsletter":
-      return "border-l-indigo-500/70";
-    default:
-      return "border-l-amber-500/70";
-  }
-}
-
 function feedTypeBadgeStyle(feedType: string | undefined): string {
   switch (feedType) {
     case "youtube":
@@ -61,6 +48,28 @@ function feedTypeBadgeStyle(feedType: string | undefined): string {
     default:
       return "bg-amber-500/8 text-amber-500";
   }
+}
+
+/** Get a favicon URL for a source, with fallback to Google's favicon service */
+function getSourceFavicon(source: FeedItem["source"]): string | null {
+  if (source?.icon_url) return source.icon_url;
+  const siteUrl = source?.site_url || source?.feed_url;
+  if (!siteUrl) return null;
+  try {
+    const domain = new URL(siteUrl).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch {
+    return null;
+  }
+}
+
+/** Get the initial letter(s) for a source name */
+function getSourceInitial(name: string | undefined): string {
+  if (!name) return "?";
+  // Use first letter of each word, max 2
+  const words = name.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 }
 
 function extractVideoId(url: string): string | null {
@@ -129,17 +138,8 @@ function YouTubeCard({
       <div className="p-4 md:p-5">
         {/* Source + time */}
         <div className="flex items-center gap-2 mb-2">
-          {source?.icon_url && (
-            <img
-              src={source.icon_url}
-              alt=""
-              className="w-4 h-4 rounded-sm object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          )}
-          <span className="text-[12px] font-medium text-muted-foreground/50 truncate">
+          <SourceBadge source={source} />
+          <span className="text-[12px] font-semibold text-muted-foreground/60 truncate">
             {source?.name || "YouTube"}
           </span>
           <span className="text-[11px] text-muted-foreground/30 shrink-0">
@@ -315,7 +315,35 @@ function PodcastCard({
   );
 }
 
-/** Article/RSS card — featured image, richer text */
+/** Source brand badge — favicon with colored initial fallback */
+function SourceBadge({ source }: { source: FeedItem["source"] }) {
+  const [imgError, setImgError] = useState(false);
+  const favicon = getSourceFavicon(source);
+  const initial = getSourceInitial(source?.name);
+  const color = source?.color || "#b45309";
+
+  if (favicon && !imgError) {
+    return (
+      <img
+        src={favicon}
+        alt=""
+        className="w-5 h-5 rounded-md object-contain"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+      style={{ backgroundColor: color }}
+    >
+      {initial.charAt(0)}
+    </span>
+  );
+}
+
+/** Article/RSS card — featured image, source branding, mobile-friendly */
 function ArticleCard({
   item,
   onSave,
@@ -331,32 +359,24 @@ function ArticleCard({
 }) {
   const source = item.source;
   const hasImage = !!item.image_url;
+  const sourceColor = source?.color || "#b45309";
 
   return (
     <div
       className={cn(
         "group relative rounded-2xl border border-border/50 bg-card overflow-hidden transition-all duration-200 hover:border-border/80 hover:shadow-md border-l-[3px] cursor-pointer",
-        feedTypeAccent(source?.feed_type),
         item.is_read && "opacity-65"
       )}
+      style={{ borderLeftColor: sourceColor }}
       onClick={onClick}
     >
       <div className="flex gap-0">
         {/* Main content */}
         <div className="flex-1 min-w-0 p-4 md:p-5">
-          {/* Source + time */}
-          <div className="flex items-center gap-2 mb-2">
-            {source?.icon_url && (
-              <img
-                src={source.icon_url}
-                alt=""
-                className="w-4 h-4 rounded-sm object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            )}
-            <span className="text-[12px] font-medium text-muted-foreground/50 truncate">
+          {/* Source badge + name + time */}
+          <div className="flex items-center gap-2 mb-2.5">
+            <SourceBadge source={source} />
+            <span className="text-[12px] font-semibold text-muted-foreground/60 truncate">
               {source?.name || "Okänd källa"}
             </span>
             <span className="text-[11px] text-muted-foreground/30 shrink-0">
@@ -373,17 +393,40 @@ function ArticleCard({
             )}
           </div>
 
-          {/* Title */}
-          <h3 className="text-[15px] md:text-[16px] font-semibold text-foreground leading-snug mb-2 line-clamp-2">
-            {item.title}
-          </h3>
+          {/* Mobile: title + inline thumbnail */}
+          <div className="flex gap-3 sm:block">
+            <div className="flex-1 min-w-0">
+              {/* Title */}
+              <h3 className="text-[15px] md:text-[16px] font-semibold text-foreground leading-snug mb-2 line-clamp-2">
+                {item.title}
+              </h3>
 
-          {/* Summary — more lines visible */}
-          {item.summary && (
-            <p className="text-[13px] text-muted-foreground/55 leading-relaxed line-clamp-3 mb-3">
-              {item.summary}
-            </p>
-          )}
+              {/* Summary — hidden on mobile when image present to save space */}
+              {item.summary && (
+                <p className={cn(
+                  "text-[13px] text-muted-foreground/55 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-3",
+                  hasImage && "hidden sm:block"
+                )}>
+                  {item.summary}
+                </p>
+              )}
+            </div>
+
+            {/* Mobile thumbnail — small square */}
+            {hasImage && (
+              <div className="sm:hidden shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-muted">
+                <img
+                  src={item.image_url!}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).parentElement!.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Author */}
           {item.author && (
@@ -439,7 +482,7 @@ function ArticleCard({
           </div>
         </div>
 
-        {/* Thumbnail — larger */}
+        {/* Desktop thumbnail — tall rectangle */}
         {hasImage && (
           <div className="hidden sm:block shrink-0 w-36 md:w-44 self-stretch">
             <img
@@ -448,8 +491,7 @@ function ArticleCard({
               className="w-full h-full object-cover"
               loading="lazy"
               onError={(e) => {
-                (e.target as HTMLImageElement).parentElement!.style.display =
-                  "none";
+                (e.target as HTMLImageElement).parentElement!.style.display = "none";
               }}
             />
           </div>
