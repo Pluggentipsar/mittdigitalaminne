@@ -423,17 +423,16 @@ export function QuickCaptureModal() {
                             </div>
                           </div>
 
-                          {/* Delete button */}
+                          {/* Delete / status */}
                           <button
                             onClick={() => deleteItem(item.id)}
                             disabled={item.deleting}
-                            className="p-1.5 rounded-lg text-muted-foreground/25 hover:text-red-500 hover:bg-red-500/8 transition-all disabled:opacity-40 shrink-0"
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-red-400/70 hover:text-red-500 hover:bg-red-500/10 transition-all disabled:opacity-40 shrink-0 border border-red-500/15"
                             title="Ta bort"
                           >
-                            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                            <Trash2 className="h-3 w-3" strokeWidth={1.5} />
+                            Radera
                           </button>
-
-                          <Check className="h-4 w-4 text-emerald-500 shrink-0" strokeWidth={2} />
                         </div>
                       );
                     })}
