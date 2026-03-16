@@ -14,16 +14,21 @@ import {
   Globe,
   ArrowRight,
   Clipboard,
+  Trash2,
+  Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/i;
 
 interface SavedItem {
+  id: string; // memory ID from API
   title: string;
   type: string;
   domain?: string;
   image?: string;
+  deleting?: boolean;
+  deleted?: boolean;
 }
 
 const TYPE_CONFIG: Record<string, { icon: typeof Link2; label: string; color: string; bg: string }> = {
@@ -54,7 +59,6 @@ export function QuickCaptureModal() {
       setClipboardUrl(null);
       setSavedItems([]);
 
-      // Try reading clipboard
       if (navigator.clipboard?.readText) {
         navigator.clipboard.readText().then((text) => {
           const trimmed = text?.trim();
@@ -152,7 +156,6 @@ export function QuickCaptureModal() {
             // Continue with basic save
           }
 
-          // Detect article type from unfurl result
           const memoryBody: Record<string, unknown> = {
             content_type: contentType,
             title,
@@ -163,16 +166,18 @@ export function QuickCaptureModal() {
             source: "web",
           };
 
-          await fetch("/api/memories", {
+          const res = await fetch("/api/memories", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(memoryBody),
           });
+          const result = await res.json();
+          const memoryId = result?.data?.id || result?.id || "";
 
-          setSavedItems((prev) => [{ title, type: contentType, domain, image }, ...prev]);
+          setSavedItems((prev) => [{ id: memoryId, title, type: contentType, domain, image }, ...prev]);
         } else {
           const memTitle = trimmed.length > 80 ? trimmed.slice(0, 77) + "..." : trimmed;
-          await fetch("/api/memories", {
+          const res = await fetch("/api/memories", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -183,11 +188,12 @@ export function QuickCaptureModal() {
               source: "web",
             }),
           });
+          const result = await res.json();
+          const memoryId = result?.data?.id || result?.id || "";
 
-          setSavedItems((prev) => [{ title: memTitle, type: "thought" }, ...prev]);
+          setSavedItems((prev) => [{ id: memoryId, title: memTitle, type: "thought" }, ...prev]);
         }
 
-        // Clear input and clipboard suggestion, ready for next save
         setValue("");
         setClipboardUrl(null);
       } catch {
@@ -198,6 +204,30 @@ export function QuickCaptureModal() {
     },
     [saving]
   );
+
+  const deleteItem = useCallback(async (itemId: string) => {
+    // Mark as deleting
+    setSavedItems((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, deleting: true } : item))
+    );
+
+    try {
+      await fetch(`/api/memories/${itemId}`, { method: "DELETE" });
+      // Mark as deleted with animation delay
+      setSavedItems((prev) =>
+        prev.map((item) => (item.id === itemId ? { ...item, deleting: false, deleted: true } : item))
+      );
+      // Remove from list after animation
+      setTimeout(() => {
+        setSavedItems((prev) => prev.filter((item) => item.id !== itemId));
+      }, 300);
+    } catch {
+      // Revert on error
+      setSavedItems((prev) =>
+        prev.map((item) => (item.id === itemId ? { ...item, deleting: false } : item))
+      );
+    }
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -223,6 +253,7 @@ export function QuickCaptureModal() {
   };
 
   const isUrl = URL_REGEX.test(value.trim());
+  const activeItems = savedItems.filter((i) => !i.deleted);
 
   return (
     <>
@@ -354,14 +385,21 @@ export function QuickCaptureModal() {
               {/* Saved items feed */}
               {savedItems.length > 0 && (
                 <div className="px-5 pb-2">
-                  <div className="space-y-2 max-h-[200px] overflow-y-auto scrollbar-none">
-                    {savedItems.map((item, i) => {
+                  <div className="space-y-2 max-h-[240px] overflow-y-auto scrollbar-none">
+                    {savedItems.map((item) => {
                       const config = TYPE_CONFIG[item.type] || TYPE_CONFIG.link;
                       const Icon = config.icon;
                       return (
                         <div
-                          key={i}
-                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15 animate-fade-in"
+                          key={item.id || item.title}
+                          className={cn(
+                            "flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all duration-300",
+                            item.deleted
+                              ? "opacity-0 scale-95 h-0 py-0 px-0 border-transparent overflow-hidden"
+                              : item.deleting
+                                ? "opacity-50 bg-red-500/5 border-red-500/15"
+                                : "bg-emerald-500/5 border-emerald-500/15 animate-fade-in"
+                          )}
                         >
                           <div className={cn(
                             "flex items-center justify-center w-8 h-8 rounded-lg shrink-0",
@@ -384,6 +422,17 @@ export function QuickCaptureModal() {
                               )}
                             </div>
                           </div>
+
+                          {/* Delete button */}
+                          <button
+                            onClick={() => deleteItem(item.id)}
+                            disabled={item.deleting}
+                            className="p-1.5 rounded-lg text-muted-foreground/25 hover:text-red-500 hover:bg-red-500/8 transition-all disabled:opacity-40 shrink-0"
+                            title="Ta bort"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          </button>
+
                           <Check className="h-4 w-4 text-emerald-500 shrink-0" strokeWidth={2} />
                         </div>
                       );
@@ -395,8 +444,8 @@ export function QuickCaptureModal() {
               {/* Footer */}
               <div className="flex items-center justify-between px-5 pb-4 pt-1">
                 <p className="text-[10px] text-muted-foreground/30 font-medium">
-                  {savedItems.length > 0
-                    ? `${savedItems.length} sparad${savedItems.length > 1 ? "e" : ""} · Lägg till fler eller stäng`
+                  {activeItems.length > 0
+                    ? `${activeItems.length} sparad${activeItems.length > 1 ? "e" : ""} · Lägg till fler eller stäng`
                     : "Enter för att spara · Sparas i inkorgen"
                   }
                 </p>
@@ -409,7 +458,7 @@ export function QuickCaptureModal() {
                       Spara
                     </button>
                   )}
-                  {savedItems.length > 0 && !saving && !value.trim() && (
+                  {activeItems.length > 0 && !saving && !value.trim() && (
                     <button
                       onClick={() => setOpen(false)}
                       className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-semibold hover:bg-primary/90 transition-all"
