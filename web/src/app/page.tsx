@@ -8,15 +8,12 @@ import {
   Calendar,
   FolderOpen,
   Tag,
-  ChevronDown,
   ArrowRight,
 } from "lucide-react";
-import type { MemoryStats, FeedItem } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { MemoryStats, Memory, FeedItem } from "@/lib/types";
 import { DashboardFeed } from "@/components/dashboard/DashboardFeed";
 import { RemindersSection } from "@/components/dashboard/RemindersSection";
 import { TimeCapsule } from "@/components/dashboard/TimeCapsule";
-import { useInbox } from "@/hooks/useInbox";
 import { useFeedItems } from "@/hooks/useFeeds";
 import { FeedDetailModal } from "@/components/feeds/FeedDetailModal";
 
@@ -34,8 +31,12 @@ export default function DashboardPage() {
   const { data } = useSWR<{ data: MemoryStats }>("/api/statistics", fetcher);
   const stats = data?.data ?? null;
 
-  // Recent memories (inbox + regular)
-  const { memories: inboxMemories, isLoading: inboxLoading, archiveMemory, mutate: mutateInbox } = useInbox();
+  // Recent memories — ALL memories (not just inbox), newest first
+  const { data: memoriesData, isLoading: memoriesLoading, mutate: mutateMemories } = useSWR<{
+    data: Memory[];
+    count: number;
+  }>("/api/memories?sort=newest&limit=20", fetcher);
+  const recentMemories = memoriesData?.data || [];
 
   // Feed suggestions
   const {
@@ -50,9 +51,6 @@ export default function DashboardPage() {
     ? feedItems.findIndex((i) => i.id === selectedItemId)
     : -1;
   const selectedItem = selectedIndex >= 0 ? feedItems[selectedIndex] : null;
-
-  // Stats collapsed state
-  const [statsOpen, setStatsOpen] = useState(false);
 
   const handleSaveFeedItem = useCallback(
     async (itemId: string) => {
@@ -75,6 +73,18 @@ export default function DashboardPage() {
       });
     },
     []
+  );
+
+  const handleArchiveMemory = useCallback(
+    async (id: string) => {
+      await fetch(`/api/memories/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_inbox: false }),
+      });
+      mutateMemories();
+    },
+    [mutateMemories]
   );
 
   const handleFeedItemClick = useCallback((item: FeedItem) => {
@@ -166,13 +176,13 @@ export default function DashboardPage() {
 
       {/* ─── Unified Feed ─── */}
       <DashboardFeed
-        memories={inboxMemories.slice(0, 15)}
+        memories={recentMemories}
         feedItems={feedItems}
         feedLoading={feedLoading}
-        memoriesLoading={inboxLoading}
+        memoriesLoading={memoriesLoading}
         onSaveFeedItem={handleSaveFeedItem}
         onMarkRead={handleMarkRead}
-        onArchiveMemory={archiveMemory}
+        onArchiveMemory={handleArchiveMemory}
         onFeedItemClick={handleFeedItemClick}
       />
 
