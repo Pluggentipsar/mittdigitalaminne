@@ -16,6 +16,7 @@ import { MarkdownContent } from "@/components/ui/MarkdownContent";
 import { YouTubePreview } from "@/components/memories/previews/YouTubePreview";
 import { LinkPreview } from "@/components/memories/previews/LinkPreview";
 import { SocialPreview } from "@/components/memories/previews/SocialPreview";
+import { AudioPreview } from "@/components/memories/previews/AudioPreview";
 import { contentTypeConfig, cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -195,13 +196,18 @@ export default function SharedMemoryPage({
           <SocialPreview type="twitter" linkUrl={memory.link_url} metadata={memory.link_metadata} />
         )}
 
+        {/* Audio/Podcast embed */}
+        {memory.content_type === "audio" && memory.link_url && (
+          <AudioPreview linkUrl={memory.link_url} metadata={memory.link_metadata} embed />
+        )}
+
         {/* Link preview */}
         {memory.content_type === "link" && memory.link_url && memory.link_metadata?.og_image && (
           <LinkPreview linkUrl={memory.link_url} metadata={memory.link_metadata} />
         )}
 
         {/* Fallback link */}
-        {memory.link_url && !["youtube", "linkedin", "instagram", "twitter"].includes(memory.content_type) && !(memory.content_type === "link" && memory.link_metadata?.og_image) && (
+        {memory.link_url && !["youtube", "linkedin", "instagram", "twitter", "audio"].includes(memory.content_type) && !(memory.content_type === "link" && memory.link_metadata?.og_image) && (
           <a
             href={memory.link_url}
             target="_blank"

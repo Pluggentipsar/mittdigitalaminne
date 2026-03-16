@@ -233,6 +233,9 @@
             video_id: unfurlData.video_id || undefined,
             channel_name: unfurlData.channel_name || undefined,
             thumbnail_url: unfurlData.image || undefined,
+            spotify_uri: unfurlData.spotify_uri || undefined,
+            podcast_name: unfurlData.podcast_name || undefined,
+            episode_name: unfurlData.episode_name || undefined,
           }
         : null,
     };

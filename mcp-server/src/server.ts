@@ -21,9 +21,9 @@ export function createServer(supabase: SupabaseClient): McpServer {
 
   server.tool(
     "add_memory",
-    "Add a new memory to the digital memory bank. Use markdown formatting in the summary for better readability (headings, bullet points, bold). Always provide a summary. YouTube/LinkedIn/Instagram/Twitter URLs are auto-detected from link_url — use content_type 'youtube' for YouTube videos, 'linkedin' for LinkedIn posts, 'instagram' for Instagram posts, 'twitter' for X/Twitter posts. YouTube metadata (title, channel, thumbnail) is fetched automatically.",
+    "Add a new memory to the digital memory bank. Use markdown formatting in the summary for better readability (headings, bullet points, bold). Always provide a summary. YouTube/LinkedIn/Instagram/Twitter/Spotify URLs are auto-detected from link_url — use content_type 'youtube' for YouTube videos, 'linkedin' for LinkedIn posts, 'instagram' for Instagram posts, 'twitter' for X/Twitter posts, 'audio' for podcasts/Spotify/audio content. YouTube metadata (title, channel, thumbnail) is fetched automatically.",
     {
-      content_type: z.enum(["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter"]).describe("Use 'youtube' for YouTube links, 'linkedin' for LinkedIn, 'instagram' for Instagram, 'twitter' for X/Twitter. Auto-detected from URL if set to 'link'."),
+      content_type: z.enum(["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter", "audio"]).describe("Use 'youtube' for YouTube links, 'linkedin' for LinkedIn, 'instagram' for Instagram, 'twitter' for X/Twitter, 'audio' for podcasts/Spotify. Auto-detected from URL if set to 'link'."),
       title: z.string().describe("A concise, descriptive title for the memory"),
       original_content: z.string().optional().describe("The raw content: full text for thoughts/articles"),
       summary: z.string().describe("A summary of the content (2-4 sentences). Use markdown for formatting."),
@@ -39,7 +39,7 @@ export function createServer(supabase: SupabaseClient): McpServer {
     "Search through saved memories using full-text search, filters by content type, tags, date range, or favorites.",
     {
       query: z.string().optional().describe("Free-text search query"),
-      content_type: z.enum(["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter"]).optional().describe("Filter by content type"),
+      content_type: z.enum(["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter", "audio"]).optional().describe("Filter by content type"),
       tags: z.array(z.string()).optional().describe("Filter by tags (AND logic)"),
       date_from: z.string().optional().describe("ISO 8601 date for start of range"),
       date_to: z.string().optional().describe("ISO 8601 date for end of range"),

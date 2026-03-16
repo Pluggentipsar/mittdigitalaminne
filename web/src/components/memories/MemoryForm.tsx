@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Image, Link2, FileText, Lightbulb, Youtube, Upload, X, Check, Loader2, Sparkles } from "lucide-react";
+import { Image, Link2, FileText, Lightbulb, Youtube, Headphones, Upload, X, Check, Loader2, Sparkles } from "lucide-react";
 import type { ContentType, Memory } from "@/lib/types";
 import { cn, contentTypeConfig } from "@/lib/utils";
 import { useTagSuggestions } from "@/hooks/useTagSuggestions";
@@ -17,6 +17,7 @@ const typeOptions: { type: ContentType; icon: any; desc: string }[] = [
   { type: "linkedin", icon: Link2, desc: "LinkedIn-inlägg" },
   { type: "instagram", icon: Image, desc: "Instagram-inlägg" },
   { type: "twitter", icon: Link2, desc: "X/Twitter-inlägg" },
+  { type: "audio", icon: Headphones, desc: "Podcast eller ljud" },
 ];
 
 interface MemoryFormProps {
@@ -163,7 +164,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
         tags,
       };
 
-      if (["link", "article", "youtube", "linkedin", "instagram", "twitter"].includes(contentType)) {
+      if (["link", "article", "youtube", "linkedin", "instagram", "twitter", "audio"].includes(contentType)) {
         body.link_url = linkUrl.trim() || null;
 
         if (unfurlData && mode === "create") {
@@ -308,7 +309,7 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
       </div>
 
       {/* URL field */}
-      {["link", "article", "youtube", "linkedin", "instagram", "twitter"].includes(contentType) && (
+      {["link", "article", "youtube", "linkedin", "instagram", "twitter", "audio"].includes(contentType) && (
         <div className="animate-fade-in">
           <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
             URL

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Image, Link2, FileText, Lightbulb, Youtube, Star, SlidersHorizontal, Tag, Bookmark, FolderOpen } from "lucide-react";
+import { Search, Image, Link2, FileText, Lightbulb, Youtube, Star, SlidersHorizontal, Tag, Bookmark, FolderOpen, Headphones } from "lucide-react";
 import type { ContentType, MemoryFilters, Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -25,6 +25,7 @@ const typeButtons: { type: ContentType | null; label: string; icon: any }[] = [
   { type: "linkedin", label: "LinkedIn", icon: Link2 },
   { type: "instagram", label: "Instagram", icon: Image },
   { type: "twitter", label: "X", icon: Link2 },
+  { type: "audio", label: "Ljud", icon: Headphones },
 ];
 
 const sortOptions = [

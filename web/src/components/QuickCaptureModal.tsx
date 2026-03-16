@@ -45,7 +45,7 @@ export function QuickCaptureModal() {
   const [clipboardUrl, setClipboardUrl] = useState<string | null>(null);
   const [clipboardChecked, setClipboardChecked] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const successTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check clipboard when opening
   useEffect(() => {

@@ -87,4 +87,12 @@ export const contentTypeConfig: Record<
     badgeClass: "badge-type-twitter",
     hex: "#1d9bf0",
   },
+  audio: {
+    label: "Ljud",
+    color: "text-type-audio",
+    bgColor: "bg-type-audio/8",
+    borderColor: "border-l-type-audio",
+    badgeClass: "badge-type-audio",
+    hex: "#1db954",
+  },
 };

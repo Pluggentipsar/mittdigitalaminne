@@ -1,4 +1,4 @@
-import { Image, Link2, FileText, Lightbulb, Youtube } from "lucide-react";
+import { Image, Link2, FileText, Lightbulb, Youtube, Headphones } from "lucide-react";
 import type { ContentType } from "@/lib/types";
 import { contentTypeConfig, cn } from "@/lib/utils";
 
@@ -40,6 +40,7 @@ const iconMap: Record<ContentType, React.ComponentType<{ className?: string }>> 
   linkedin: LinkedInIcon,
   instagram: InstagramIcon,
   twitter: XTwitterIcon,
+  audio: Headphones,
 };
 
 export function ContentTypeIcon({ type, className }: ContentTypeIconProps) {

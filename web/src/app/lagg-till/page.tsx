@@ -17,7 +17,7 @@ export default function LaggTillPage() {
               L&auml;gg till
             </h1>
             <p className="text-[14px] text-muted-foreground/70 mt-2.5">
-              Spara en tanke, l&auml;nk, artikel eller bild
+              Spara en tanke, l&auml;nk, artikel, podcast eller bild
             </p>
           </div>
           <Link

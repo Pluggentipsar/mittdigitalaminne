@@ -18,7 +18,7 @@ export interface ParseResult {
 }
 
 const VALID_TYPES = new Set<string>([
-  "image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter",
+  "image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter", "audio",
 ]);
 
 function detectContentType(row: Record<string, string>): ContentType {
@@ -27,6 +27,7 @@ function detectContentType(row: Record<string, string>): ContentType {
   if (url.includes("linkedin.com")) return "linkedin";
   if (url.includes("instagram.com")) return "instagram";
   if (url.includes("twitter.com") || url.includes("x.com")) return "twitter";
+  if (url.includes("spotify.com") || url.includes("podcasts.apple.com") || url.includes("soundcloud.com")) return "audio";
   if (url) return "link";
   if (row.image_url) return "image";
   return "thought";

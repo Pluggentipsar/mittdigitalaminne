@@ -21,6 +21,7 @@ import {
   Linkedin,
   Instagram,
   Twitter,
+  Headphones,
   Hash,
   Folder,
   Command,
@@ -38,6 +39,7 @@ const contentTypeIcons: Record<ContentType, React.ElementType> = {
   linkedin: Linkedin,
   instagram: Instagram,
   twitter: Twitter,
+  audio: Headphones,
 };
 
 /* ── Navigation items ──────────────────────────────────────── */
