@@ -20,6 +20,11 @@ export function useInbox() {
     mutate();
   };
 
+  const deleteMemory = async (id: string) => {
+    await fetch(`/api/memories/${id}`, { method: "DELETE" });
+    mutate();
+  };
+
   return {
     memories: data?.data || [],
     count: data?.count || 0,
@@ -27,5 +32,6 @@ export function useInbox() {
     error,
     mutate,
     archiveMemory,
+    deleteMemory,
   };
 }

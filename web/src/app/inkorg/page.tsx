@@ -6,7 +6,7 @@ import { QuickCapture } from "@/components/inbox/QuickCapture";
 import { InboxCard } from "@/components/inbox/InboxCard";
 
 export default function InkorgPage() {
-  const { memories, count, isLoading, mutate, archiveMemory } = useInbox();
+  const { memories, count, isLoading, mutate, archiveMemory, deleteMemory } = useInbox();
 
   return (
     <div className="space-y-8">
@@ -77,6 +77,7 @@ export default function InkorgPage() {
                 key={memory.id}
                 memory={memory}
                 onArchive={archiveMemory}
+                onDelete={deleteMemory}
               />
             ))}
           </div>
