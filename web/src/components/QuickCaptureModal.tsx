@@ -16,8 +16,10 @@ import {
   Clipboard,
   Trash2,
   Undo2,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProjects } from "@/hooks/useProjects";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/i;
 
@@ -49,7 +51,10 @@ export function QuickCaptureModal() {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [clipboardUrl, setClipboardUrl] = useState<string | null>(null);
   const [clipboardChecked, setClipboardChecked] = useState(false);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { projects } = useProjects();
+  const activeProjects = projects.filter((p) => p.status === "active");
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check clipboard when opening
@@ -164,6 +169,7 @@ export function QuickCaptureModal() {
             link_metadata: linkMetadata,
             is_inbox: true,
             source: "web",
+            ...(selectedProjectIds.length > 0 && { project_ids: selectedProjectIds }),
           };
 
           const res = await fetch("/api/memories", {
@@ -186,6 +192,7 @@ export function QuickCaptureModal() {
               original_content: trimmed,
               is_inbox: true,
               source: "web",
+              ...(selectedProjectIds.length > 0 && { project_ids: selectedProjectIds }),
             }),
           });
           const result = await res.json();
@@ -381,6 +388,55 @@ export function QuickCaptureModal() {
                   )}
                 </div>
               </div>
+
+              {/* Project selector */}
+              {activeProjects.length > 0 && (
+                <div className="px-5 pb-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[9px] font-semibold text-muted-foreground/40 uppercase tracking-[0.1em]">
+                      Projekt
+                    </span>
+                    {activeProjects.map((project) => {
+                      const isSelected = selectedProjectIds.includes(project.id);
+                      return (
+                        <button
+                          key={project.id}
+                          type="button"
+                          onClick={() =>
+                            setSelectedProjectIds((prev) =>
+                              isSelected
+                                ? prev.filter((id) => id !== project.id)
+                                : [...prev, project.id]
+                            )
+                          }
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all duration-200",
+                            isSelected
+                              ? "shadow-sm"
+                              : "border-border/50 text-muted-foreground/50 hover:border-border hover:text-foreground"
+                          )}
+                          style={
+                            isSelected
+                              ? {
+                                  borderColor: project.color,
+                                  backgroundColor: `${project.color}10`,
+                                  color: project.color,
+                                }
+                              : undefined
+                          }
+                        >
+                          {isSelected ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <FolderOpen className="h-3 w-3" />
+                          )}
+                          {project.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Saved items feed */}
               {savedItems.length > 0 && (
