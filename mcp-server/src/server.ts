@@ -12,6 +12,7 @@ import { handleUploadImage } from "./tools/upload-image.js";
 import { handleGetStatistics } from "./tools/get-statistics.js";
 import { handleAddNote } from "./tools/add-note.js";
 import { handleGetNotes } from "./tools/get-notes.js";
+import { handleListProjects } from "./tools/list-projects.js";
 
 export function createServer(supabase: SupabaseClient): McpServer {
   const server = new McpServer({
@@ -36,7 +37,7 @@ export function createServer(supabase: SupabaseClient): McpServer {
 
   server.tool(
     "search_memories",
-    "Search through saved memories using full-text search, filters by content type, tags, date range, or favorites.",
+    "Search through saved memories using full-text search, filters by content type, tags, date range, favorites, or project. All filters combine with AND logic.",
     {
       query: z.string().optional().describe("Free-text search query"),
       content_type: z.enum(["image", "link", "article", "thought", "youtube", "linkedin", "instagram", "twitter", "audio"]).optional().describe("Filter by content type"),
@@ -45,6 +46,7 @@ export function createServer(supabase: SupabaseClient): McpServer {
       date_to: z.string().optional().describe("ISO 8601 date for end of range"),
       favorites_only: z.boolean().optional().describe("Only return favorited memories"),
       inbox: z.boolean().optional().describe("Filter by inbox status: true = only inbox items, false = only processed items, omit = all"),
+      project_id: z.string().optional().describe("Filter by project UUID. Returns only memories belonging to this project."),
       limit: z.number().optional().describe("Max results (default 20)"),
       offset: z.number().optional().describe("Offset for pagination"),
     },
@@ -125,6 +127,13 @@ export function createServer(supabase: SupabaseClient): McpServer {
       memory_id: z.string().describe("UUID of the memory to get notes for"),
     },
     async (args) => handleGetNotes(supabase, args)
+  );
+
+  server.tool(
+    "list_projects",
+    "List all projects with their ID, name, description, color, icon, status, and memory count.",
+    {},
+    async () => handleListProjects(supabase)
   );
 
   return server;

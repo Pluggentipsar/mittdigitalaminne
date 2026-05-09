@@ -9,9 +9,14 @@ export async function handleSearchMemories(supabase: SupabaseClient, args: Recor
     date_to,
     favorites_only,
     inbox,
+    project_id,
     limit = 20,
     offset = 0,
   } = args;
+
+  // When filtering by project, fetch all candidates so post-filter doesn't miss any
+  const rpcLimit = project_id ? 1000 : (limit as number);
+  const rpcOffset = project_id ? 0 : (offset as number);
 
   const { data, error } = await supabase.rpc("search_memories", {
     search_query: (query as string) || null,
@@ -24,15 +29,26 @@ export async function handleSearchMemories(supabase: SupabaseClient, args: Recor
     filter_favorites_only: !!favorites_only,
     filter_inbox: inbox != null ? !!inbox : null,
     sort_by: "relevance",
-    result_limit: limit as number,
-    result_offset: offset as number,
+    result_limit: rpcLimit,
+    result_offset: rpcOffset,
   });
 
   if (error) {
     return { content: [{ type: "text" as const, text: `Error: ${error.message}` }] };
   }
 
-  const results = data || [];
+  let results = data || [];
+
+  if (project_id) {
+    const { data: projectMemories } = await supabase
+      .from("memory_projects")
+      .select("memory_id")
+      .eq("project_id", project_id as string);
+    const projectMemoryIds = new Set(
+      (projectMemories || []).map((pm: any) => pm.memory_id)
+    );
+    results = results.filter((m: any) => projectMemoryIds.has(m.id));
+  }
 
   if (results.length === 0) {
     return {
@@ -40,7 +56,7 @@ export async function handleSearchMemories(supabase: SupabaseClient, args: Recor
     };
   }
 
-  const totalCount = results[0]?.total_count ?? results.length;
+  const totalCount = project_id ? results.length : (results[0]?.total_count ?? results.length);
 
   const formatted = results
     .map((m: any) => {
