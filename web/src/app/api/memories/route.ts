@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
   const supabase = createServerClient();
   const body = await req.json();
 
-  const { tags: tagNames, ...memoryData } = body;
+  const { tags: tagNames, project_ids: projectIds, ...memoryData } = body;
 
   // Create memory — allow source override from extension/import
   const validSources = ["web", "mcp", "manual", "import", "extension", "feed"];
@@ -134,6 +134,15 @@ export async function POST(req: NextRequest) {
           .from("memory_tags")
           .insert({ memory_id: memory.id, tag_id: tag.id });
       }
+    }
+  }
+
+  // Handle project associations
+  if (projectIds && projectIds.length > 0) {
+    for (const projectId of projectIds) {
+      await supabase
+        .from("memory_projects")
+        .insert({ memory_id: memory.id, project_id: projectId });
     }
   }
 

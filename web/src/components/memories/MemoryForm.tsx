@@ -2,11 +2,12 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Image, Link2, FileText, Lightbulb, Youtube, Headphones, Upload, X, Check, Loader2, Sparkles } from "lucide-react";
+import { Image, Link2, FileText, Lightbulb, Youtube, Headphones, Upload, X, Check, Loader2, Sparkles, FolderOpen } from "lucide-react";
 import type { ContentType, Memory } from "@/lib/types";
 import { cn, contentTypeConfig } from "@/lib/utils";
 import { useTagSuggestions } from "@/hooks/useTagSuggestions";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useProjects } from "@/hooks/useProjects";
 
 const typeOptions: { type: ContentType; icon: any; desc: string }[] = [
   { type: "thought", icon: Lightbulb, desc: "En idé eller reflektion" },
@@ -57,6 +58,9 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
     snapshot_html?: string;
   } | null>(null);
   const lastUnfurledUrl = useRef("");
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+  const { projects } = useProjects();
+  const activeProjects = projects.filter((p) => p.status === "active");
   const { suggestions, loading: suggestionsLoading, fetchSuggestions } = useTagSuggestions();
   const debouncedTitle = useDebounce(title, 1000);
   const debouncedSummary = useDebounce(summary, 1000);
@@ -188,7 +192,9 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
 
       if (mode === "create") {
         body.is_inbox = false;
-        // Store snapshot if available from unfurl
+        if (selectedProjectIds.length > 0) {
+          body.project_ids = selectedProjectIds;
+        }
         if (unfurlData?.snapshot_html) {
           body.snapshot_html = unfurlData.snapshot_html;
           body.snapshot_taken_at = new Date().toISOString();
@@ -545,6 +551,55 @@ export function MemoryForm({ mode, memory, onSuccess }: MemoryFormProps) {
           </div>
         )}
       </div>
+
+      {/* Projects */}
+      {mode === "create" && activeProjects.length > 0 && (
+        <div>
+          <label className="block text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">
+            Projekt
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {activeProjects.map((project) => {
+              const isSelected = selectedProjectIds.includes(project.id);
+              return (
+                <button
+                  key={project.id}
+                  type="button"
+                  onClick={() =>
+                    setSelectedProjectIds((prev) =>
+                      isSelected
+                        ? prev.filter((id) => id !== project.id)
+                        : [...prev, project.id]
+                    )
+                  }
+                  className={cn(
+                    "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[12px] font-medium border-2 transition-all duration-200",
+                    isSelected
+                      ? "shadow-sm"
+                      : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground"
+                  )}
+                  style={
+                    isSelected
+                      ? {
+                          borderColor: project.color,
+                          backgroundColor: `${project.color}10`,
+                          color: project.color,
+                        }
+                      : undefined
+                  }
+                >
+                  {isSelected ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <FolderOpen className="h-3.5 w-3.5" />
+                  )}
+                  {project.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Submit */}
       <button
